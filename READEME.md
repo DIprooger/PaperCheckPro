@@ -189,7 +189,7 @@ Description of endpoints, request and response formats. Examples of
 data that must be passed to process requests.                                                                                                                                       
 
 ---
----
+
 ### **Rules for working with **Git** for thesis writing and development. Branch organization**                                                                               
 `One task - one branch`: You should create a separate branch from the                                                                                
 main for each new task or functionality.                                                                                
