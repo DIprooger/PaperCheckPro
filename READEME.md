@@ -1,7 +1,7 @@
 # Diploma project
 
 ## General description of the project
-**Project name**: to come up with a name.
+**Project name**: ?.
 
 Project's point: Web application for checking school papers.  
 The application finds errors, they write them down. 
