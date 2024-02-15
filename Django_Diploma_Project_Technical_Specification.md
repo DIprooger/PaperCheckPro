@@ -27,27 +27,32 @@ Using **Django ORM** to interact with the database.
 ___
 
 ## **Description of database models**
-1) Model **User**: 
+
+1) Model **Role**: 
+* `id`: Integer (Primary Key)                                                                        
+* `role`: CharField (Student, Teacher, Admin)  
+
+2) Model **User**: 
 * `id`: Integer (Primary Key)                                                                        
 * `email`: EmailField                                                                       
 * `first_name`: CharField                                                                       
 * `last_name`: CharField                                                                        
 * `username`: CharField   
 * `is_staff` : BooleanField
-* `role` : CharField (Student, Teacher, Admin)
+* `role` : ForeignKey (Role) 
 * `is_verified` : BooleanField
 * `is_active` : BooleanField
 * `date_joined` : DateTimeField
 * `last_login` : DateTimeField
 
-2) Model **StudentWork**:                                                                        
+3) Model **StudentWork**:                                                                        
 * `id` : Integer (Primary Key)                                                                       
 * `name_work`: CharField  
 * `writing_date` : DateTimeField
-* `student` : ForeignKey (Foreign Key, User (Student))
+* `student` : ForeignKey (User (Student))
 * `text_work`: TextField
 * `assessment` : CharField
-* `teacher` : ForeignKey (Foreign Key, User (Teacher))
+* `teacher` : ForeignKey (User (Teacher))
 * `created_at`: DateTimeField
 * `updated_at` : DateTimeField
 * `deleted_at`: DateTimeField
