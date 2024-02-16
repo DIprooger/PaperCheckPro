@@ -28,24 +28,23 @@ ___
 
 ## **Description of database models**
 
-1) Model **Role**: 
-* `id`: Integer (Primary Key)                                                                        
-* `role`: CharField (Student, Teacher, Admin)  
-
-2) Model **User**: 
+1) Model **User**: 
 * `id`: Integer (Primary Key)                                                                        
 * `email`: EmailField                                                                       
 * `first_name`: CharField                                                                       
 * `last_name`: CharField                                                                        
-* `username`: CharField   
+* `username`: CharField  
+* `phone` : CharField
 * `is_staff` : BooleanField
-* `role` : ForeignKey (Role) 
-* `is_verified` : BooleanField
+* `is_superuser` : BooleanField 
+* `is_superuser` : BooleanField 
+* `is_moderator` : BooleanField
 * `is_active` : BooleanField
 * `date_joined` : DateTimeField
 * `last_login` : DateTimeField
+* `date_delete` : DateTimeField
 
-3) Model **StudentWork**:                                                                        
+2) Model **StudentWork**:                                                                        
 * `id` : Integer (Primary Key)                                                                       
 * `name_work`: CharField  
 * `writing_date` : DateTimeField
@@ -56,7 +55,7 @@ ___
 * `created_at`: DateTimeField
 * `updated_at` : DateTimeField
 * `deleted_at`: DateTimeField
-ForeignKey
+
 ---
 
 ## **Functional Requirements**                                                                               
