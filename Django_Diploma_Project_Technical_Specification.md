@@ -49,7 +49,9 @@ ___
 * `name_work`: CharField  
 * `writing_date` : DateTimeField
 * `student` : ForeignKey (User (Student))
+* `image_work` : ImageField
 * `text_work`: TextField
+* `proven_work` : TextField
 * `assessment` : CharField
 * `teacher` : ForeignKey (User (Teacher))
 * `created_at`: DateTimeField
