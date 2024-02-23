@@ -54,6 +54,31 @@ class CreateWorkView(CreateAPIView):
 
 class DecodeImageView(APIView):
 
+    def mathpix(self, image_data):
+        BASE_DIR = '/home/diana/Desktop/Python/training/diplom/.env'
+        env = environ.Env()
+        environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+        mathpix_app_id = env("MATHPIX_APP_ID")
+        mathpix_api_key = env("MATHPIX_API")
+        my_path = "/home/diana/Desktop/Python/training/diplom/media/"
+
+        # Call Mathpix API to decode the image
+        response = requests.post(
+            "https://api.mathpix.com/v3/text",
+            files={"file": open(my_path + str(image_data), "rb")},
+            data={
+                "options_json": json.dumps({
+                    "math_inline_delimiters": ["$", "$"],
+                    "rm_spaces": True
+                }),
+            },
+            headers={
+                "app_id": mathpix_app_id,
+                "app_key": mathpix_api_key
+            },
+        )
+        return response
+
     def post(self, request, *args, **kwargs):
         student_work_id = request.data.get("id")
 
@@ -79,28 +104,7 @@ class DecodeImageView(APIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        BASE_DIR = '/home/diana/Desktop/Python/training/diplom/.env'
-        env = environ.Env()
-        environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-        mathpix_app_id = env("MATHPIX_APP_ID")
-        mathpix_api_key = env("MATHPIX_API")
-        my_path = "/home/diana/Desktop/Python/training/diplom/media/"
-
-        # Call Mathpix API to decode the image
-        response = requests.post(
-            "https://api.mathpix.com/v3/text",
-            files={"file": open(my_path + str(image_data), "rb")},
-            data={
-                "options_json": json.dumps({
-                    "math_inline_delimiters": ["$", "$"],
-                    "rm_spaces": True
-                }),
-            },
-            headers={
-                "app_id": mathpix_app_id,
-                "app_key": mathpix_api_key
-            },
-        )
+        response = self.mathpix(image_data)
 
         if response.status_code != 200:
             return Response({
@@ -124,6 +128,27 @@ class DecodeImageView(APIView):
 
 class ResponseTextView(APIView):
 
+    def open_ai(self, text_data):
+        BASE_DIR = '/home/diana/Desktop/Python/training/diplom/.env'
+        env = environ.Env()
+        environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+        chatgpt_api_key = env("OPEN_AI_API")
+        chatgpt_organization = env('OPEN_AI_ORGANIZATION')
+        cotent_system = 'Ты учитель по математике. Твоя задача проверять работы по метематике и выставлять оценку.'
+
+        client = OpenAI(
+            api_key=chatgpt_api_key,
+            organization=chatgpt_organization,
+        )
+        chat_completion = client.chat.completions.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": cotent_system},
+                {"role": "user", "content": text_data}
+            ]
+        )
+        return chat_completion
+
     def post(self, request, *args, **kwargs):
         student_work_id = request.data.get("id")
 
@@ -142,33 +167,20 @@ class ResponseTextView(APIView):
             )
 
         text_data = student_work.text_work
+
         if not text_data:
             return Response({
                 "error": "No text data found for the student work."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        BASE_DIR = '/home/diana/Desktop/Python/training/diplom/.env'
-        env = environ.Env()
-        environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-        chatgpt_api_key = env("OPEN_AI_API")
-        chatgpt_organization = env('OPEN_AI_ORGANIZATION')
-
-        client = OpenAI(
-            api_key=chatgpt_api_key,
-            organization=chatgpt_organization
-        )
-        chat_completion = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": """Ты учитель математики и проверяешь работу. 
-            Проверь правильно ли решена эта работа, если нет то обьясни почему:""" + str(text_data)}]
-        )
-
         # if chat_completion.status_code != 200:
         #     return Response({
         #         "error": "Failed to get completion from OpenAI API."},
         #         status=status.HTTP_500_INTERNAL_SERVER_ERROR
         #     )
+
+        chat_completion = self.open_ai(text_data)
 
         # Extract text from the response
         chatgpt_response = chat_completion.json()
