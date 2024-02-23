@@ -54,3 +54,23 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+
+class SubjectGrade(models.Model):
+    subject = models.CharField(max_length=100)
+    date = models.DateField()
+    work_type = models.CharField(max_length=100)
+    grade = models.IntegerField()
+    photo = models.ImageField(upload_to='photos/', blank=True, null=True)
+
+    def __str__(self):
+        return self.subject
+
+
+class Album(models.Model):
+    name = models.CharField(max_length=255)
+    creation_date = models.DateTimeField(auto_now_add=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name

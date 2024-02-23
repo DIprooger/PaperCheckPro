@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <style>
+        /* Стиль для боковой панели */
+        .sidebar {
+            width: 160px; /* Ширина панели */
+            height: 100vh; /* Высота как вся страница */
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: #ADD8E6; /* Светло-голубой цвет */
+            overflow: auto; /* Добавить прокрутку при необходимости */
+            padding: 20px;
+        }
+
+        /* Стиль для таблицы */
+        table {
+            margin-left: 200px; /* Добавить отступ слева для таблицы */
+            width: calc(100% - 200px); /* Учесть ширину панели */
+            border-collapse: collapse; /* Убрать промежутки между ячейками */
+        }
+
+        th, td {
+            text-align: left;
+            padding: 8px;
+            border: 1px solid #ddd; /* Добавить границы */
+        }
+
+        tr:nth-child(even) {background-color: #f2f2f2;}
+    </style>
+    <script>
+        function calculateAverage() {
+            // Получаем таблицу с оценками
+            var gradesTable = document.querySelector('.main table:first-of-type');
+            // Получаем строки таблицы, исключая заголовок
+            var rows = gradesTable.querySelectorAll('tr:not(:first-child)');
+            // Объект для хранения суммарных оценок по предметам
+            var subjectGrades = {};
+
+            // Перебираем строки таблицы
+            rows.forEach(function(row) {
+                // Получаем предмет и оценку
+                var subject = row.cells[0].textContent;
+                var grade = parseFloat(row.cells[3].textContent);
+
+                // Если предмет уже есть в объекте, добавляем оценку к сумме
+                if (subjectGrades[subject]) {
+                    subjectGrades[subject].sum += grade;
+                    subjectGrades[subject].count++;
+                } else {
+                    // Иначе создаем новый объект для предмета
+                    subjectGrades[subject] = { sum: grade, count:  1 };
+                }
+            });
+
+            // Получаем таблицу с итогами
+            var resultsTable = document.querySelector('.main table:last-of-type');
+            // Очищаем таблицу от старых данных
+            resultsTable.innerHTML = resultsTable.innerHTML.replace(/<tr>.*?<\/tr>/g, '');
+
+            // Добавляем строки в таблицу с итогами
+            for (var subject in subjectGrades) {
+                var averageGrade = subjectGrades[subject].sum / subjectGrades[subject].count;
+                var newRow = resultsTable.insertRow();
+                newRow.innerHTML = '<td>' + subject + '</td><td>' + subjectGrades[subject].count + '</td><td>' + averageGrade.toFixed(1) + '</td>';
+            }
+        }
+
+        // Вызываем функцию при загрузке страницы
+        window.onload = calculateAverage;
+    </script>
+</head>
+<body>
+    <!-- Боковая панель навигации, данные будут браться из формы в будущем  -->
+    <div class="sidebar" id="mySidebar">
+        <input type="text" placeholder="Имя"><br>
+        <input type="text" placeholder="Фамилия"><br>
+        <input type="text" placeholder="Почта"><br>
+
+        <label for="class">Класс:</label><br>
+        <select name="class" id="class">
+            <option value="5">5 класс</option>
+            <option value="6">6 класс</option>
+            <option value="7">7 класс</option>
+            <option value="8">8 класс</option>
+            <option value="9">9 класс</option>
+            <option value="10">10 класс</option>
+        </select>
+    </div>
+    <div id="gradesData" style="display: none;" data-subjects="{{ grades|join:',' }}" data-grades="{{ grades|join:',' }}"></div>
+    <!-- Основное содержимое -->
+    <div class="main">
+        <table>
+            <tr>
+                <th>Предмет</th>
+                <th>Дата</th>
+                <th>Тип работы</th>
+                <th>Оценка</th>
+                <th>Работа</th>
+            </tr>
+            {% for grade in grades %}
+            <tr>
+                <td>{{ grade.subject }}</td>
+                <td>{{ grade.date }}</td>
+                <td>{{ grade.work_type }}</td>
+                <td>{{ grade.grade }}</td>
+                <td><img src="{{ grade.photo.url }}" alt="{{ grade.subject }}" width="50" height="50"></td>
+            </tr>
+             {% empty %}
+            <tr>
+                <td colspan="5">Нет записей</td>
+            </tr>
+            {% endfor %}
+        </table>
+
+        <p>ИТОГО</p>
+
+        <table>
+            <tr>
+                <th>ИТОГО</th>
+            </tr>
+        </table>
+
+    <table id="resultsTable">
+        <tr>
+            <th>Предмет</th>
+            <th>Количество работ</th>
+            <th>Оценка</th>
+        </tr>
+        <!-- Здесь будут добавлены строки с вычисленными данными -->
+    </table>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var gradesData = document.getElementById('gradesData');
+            var subjects = gradesData.dataset.subjects.split(',');
+            var grades = gradesData.dataset.grades.split(',');
+
+            // Пример использования данных
+            console.log(subjects);
+            console.log(grades);
+
+            // Здесь вы можете добавить дополнительный код для работы с данными
+        });
+    </script>
+
+    </div>
+</body>
+</html>
