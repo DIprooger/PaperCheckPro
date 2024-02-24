@@ -30,7 +30,6 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     phone = models.CharField(
         max_length=75,
-        blank=True,
         null=True
     )
     is_superuser = models.BooleanField(default=False)

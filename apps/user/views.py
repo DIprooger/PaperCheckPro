@@ -48,7 +48,7 @@ class UserRegistrationGenericView(CreateAPIView):
 
 class ListUsersGenericView(ListAPIView):
     # permission_classes = [IsAuthenticated]
-    permission_classes = [IsAuthenticated, IsAdminUser]
+    # permission_classes = [IsAuthenticated, IsAdminUser]
     serializer_class = UserListSerializer
 
     def get_queryset(self):
@@ -76,7 +76,7 @@ class ListUsersGenericView(ListAPIView):
 
 
 class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
-    permission_classes = [IsAuthenticated]
+    # permission_classes = [IsAuthenticated]
     serializer_class = UserInfoSerializer
 
     def get_object(self):
