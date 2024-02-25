@@ -50,7 +50,7 @@ INSTALLED_APPS = [
 
     # local
     'apps.user.apps.UserConfig',
-    # 'apps.student_work.apps.StudentWorkConfig',
+    'apps.student_work.apps.StudentWorkConfig',
     'apps.jwt_config.apps.JwtConfigConfig',
 ]
 

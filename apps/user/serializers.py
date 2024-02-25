@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from apps.user.error_messages import PASSWORDS_DO_NOT_MATCH_ERROR
-from apps.user.models import User
+from apps.user.models import User, StudentWork
 
 
 class UserRegisterSerializer(serializers.ModelSerializer):
@@ -59,3 +59,8 @@ class UserInfoSerializer(serializers.ModelSerializer):
             'phone',
             'date_joined'
         ]
+
+class StudentWorkSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentWork
+        fields = '__all__'

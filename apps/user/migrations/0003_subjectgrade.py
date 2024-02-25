@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('user', '0002_remove_user_role_user_is_moderator_and_more'),
+        ('user', '0002_alter_user_phone'),
     ]
 
     operations = [

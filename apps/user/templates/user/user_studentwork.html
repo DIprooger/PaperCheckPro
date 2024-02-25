@@ -31,6 +31,16 @@
         tr:nth-child(even) {background-color: #f2f2f2;}
     </style>
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var urlParams = new URLSearchParams(window.location.search);
+            var error = urlParams.get('error');
+
+            if (error === 'access_denied') {
+                // Отображение модального окна с сообщением об ошибке
+                alert('Доступ запрещен. Вы не можете просматривать профиль этого пользователя.');
+            }
+        });
+
         function calculateAverage() {
             // Получаем таблицу с оценками
             var gradesTable = document.querySelector('.main table:first-of-type');

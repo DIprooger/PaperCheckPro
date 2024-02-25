@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
-
+from django.conf import settings
+from django.conf.urls.static import static
 
 from rest_framework_simplejwt.views import (
     TokenRefreshView
@@ -9,7 +10,7 @@ from rest_framework_simplejwt.views import (
 from apps.user.views import (
     UserRegistrationGenericView,
     ListUsersGenericView,
-    UserDetailGenericView,
+    UserDetailGenericView, UploadImagesView,
 )
 from apps.jwt_config.views import (
     CustomTokenObtainPairView
@@ -18,16 +19,16 @@ from apps.jwt_config.views import (
 urlpatterns = [
     path("", ListUsersGenericView.as_view()),
     path("<int:user_id>/", UserDetailGenericView.as_view()),
-    # path("register/", UserRegistrationGenericView.as_view()),
+    path("register/", UserRegistrationGenericView.as_view(), name='register'),
     path("auth/login/", CustomTokenObtainPairView.as_view()),
     path("auth/refresh-token/", TokenRefreshView.as_view()),
 
-    path('student/', views.student, name='student'),
-    path('moderator/', views.moderator, name='moderator'),
-    path('student/', views.student_page, name='student_page'),
-    path('api/create_album/', views.create_album, name='create_album'),
-    path('user_form/', views.user_form_view, name='user_form'),
+    path('user/<int:user_id>/', views.user_profile, name='user_profile'),
+    path('moderator/', views.moderator_view, name='moderator'),
     path('login/', views.login_view, name='login'),
 
-]
+    path('create_work/', views.CreateWorkView.as_view(), name='create_work'),
+    path('all_student_works/', views.AllStudentWorksView.as_view(), name='all_student_works'),
+
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 

@@ -1,399 +1,52 @@
-<!DOCTYPE html>
-<html lang="ru">
+<!doctype html>
+<html lang="en">
 <head>
-    <style>
-        /* Стиль для основного содержимого */
-        .main {
-            width:   100%; /* Ширина основного содержимого равна   100% ширины окна браузера */
-            padding:   20px; /* Добавить отступы для основного содержимого */
-        }
-
-        .aside {
-            width:   97%; /* Ширина основного содержимого равна   100% ширины окна браузера */
-            text-align: right; /* Выравнивание по правому краю */
-        }
-
-        /* Стиль для таблицы */
-        table {
-            width:   100%; /* Занимать всю доступную ширину родительского элемента */
-            border-collapse: collapse; /* Убрать промежутки между ячейками */
-        }
-
-        th, td {
-            text-align: left;
-            padding:   8px;
-            border:   1px solid #ddd; /* Добавить границы */
-        }
-
-        tr:nth-child(even) {background-color: #f2f2f2;}
-
-        img {
-            max-width:   100%;
-            height: auto;
-        }
-
-        /* Стиль для контейнера альбома */
-        .album-container {
-            margin-top:   20px; /* Отступ сверху для каждого нового альбома */
-        }
-
-        /* Стиль для модального окна */
-        .modal {
-            display: none; /* По умолчанию скрыто */
-            position: fixed; /* Оставаться на месте */
-            z-index:   1; /* Находиться над всеми другими элементами */
-            padding-top:   100px; /* Отступ сверху */
-            left:   0;
-            top:   0;
-            width:   100%; /* Полная ширина */
-            height:   100%; /* Полная высота */
-            overflow: auto; /* Включить прокрутку */
-            background-color: rgb(0,0,0); /* Черный фон с прозрачностью */
-            background-color: rgba(0,0,0,0.4); /* Черный фон с прозрачностью */
-        }
-
-        /* Стиль для контента модального окна */
-        .modal-content {
-            background-color: #fefefe;
-            margin: auto;
-            padding:   20px;
-            border:   1px solid #888;
-            width:   80%;
-        }
-    </style>
-    <script>
-        function createImageTable(albumName, imagesArray) {
-        var table = document.createElement('table');
-        var thead = document.createElement('thead');
-        var tbody = document.createElement('tbody');
-
-        // Создаем заголовки таблицы
-        var tr = document.createElement('tr');
-        var th1 = document.createElement('th');
-        th1.textContent = 'ФИО'; // Изменено название столбца
-        var th2 = document.createElement('th');
-        th2.textContent = 'Изображение'; // Изменено название столбца
-        var th3 = document.createElement('th');
-        th3.textContent = 'Оценка'; // Заголовок для столбца оценки
-        tr.appendChild(th1);
-        tr.appendChild(th2);
-        tr.appendChild(th3);
-        thead.appendChild(tr);
-        table.appendChild(thead);
-
-        // Создаем строки таблицы для каждого изображения
-        imagesArray.forEach(function(image) {
-            var tr = document.createElement('tr');
-            var td1 = document.createElement('td');
-            td1.textContent = image.alt; // Предполагается, что alt содержит ФИО
-            tr.appendChild(td1);
-
-            var td2 = document.createElement('td');
-            var img = document.createElement('img');
-            img.src = image.src;
-            img.alt = image.alt;
-            img.style.width = '100px'; // Устанавливаем фиксированный размер для мини-версии
-            img.onclick = function() { showImage(image.src); }; // Добавляем обработчик клика для увеличения изображения
-            td2.appendChild(img);
-            tr.appendChild(td2);
-
-            var td3 = document.createElement('td');
-            // Оставляем этот столбец пустым, так как оценка еще не задана
-            tr.appendChild(td3);
-
-            tbody.appendChild(tr);
-        });
-
-        table.appendChild(tbody);
-        return table; // Возвращаем созданную таблицу
-    }
-
-        // Функция для добавления нового альбома
-        function addNewAlbum() {
-        var albumName = prompt("Введите название альбома:");
-        if (albumName !== null) {
-            // Здесь нужно получить ID пользователя, который создает альбом
-            // Это может быть реализовано разными способами, например, через аутентификацию пользователя
-            var userId =   1; // Пример ID пользователя
-
-            // Создаем элементы для нового альбома
-            var titleLabel = document.createElement('label');
-            titleLabel.setAttribute('for', 'titleInput');
-            titleLabel.textContent = 'Название альбома:';
-
-            var titleInput = document.createElement('input');
-            titleInput.setAttribute('type', 'text');
-            titleInput.setAttribute('id', 'titleInput');
-            titleInput.setAttribute('name', 'title');
-            titleInput.setAttribute('placeholder', 'Введите название');
-            titleInput.setAttribute('value', albumName);
-            titleInput.setAttribute('readonly', true);
-
-            // Создаем элемент для отображения даты создания альбома
-            var dateLabel = document.createElement('label');
-            dateLabel.textContent = 'Дата создания: ' + new Date().toLocaleDateString();
-
-            var addButton = document.createElement('button');
-            addButton.textContent = 'Добавить работы';
-            addButton.onclick = function() { addNewWork(this.parentNode); };
-
-            var deleteAlbumButton = document.createElement('button');
-            deleteAlbumButton.textContent = 'Удалить альбом';
-            deleteAlbumButton.onclick = function() { deleteAlbum(this.parentNode); };
-
-
-            // Создаем контейнер для нового альбома
-            var albumContainer = document.createElement('div');
-            albumContainer.className = 'album-container'; // Добавляем класс для стилизации
-            albumContainer.appendChild(titleLabel);
-            albumContainer.appendChild(titleInput);
-            albumContainer.appendChild(dateLabel); // Добавляем элемент с датой создания
-            albumContainer.appendChild(addButton);
-            albumContainer.appendChild(deleteAlbumButton);
-
-            // Создаем таблицу для нового альбома
-            var table = createImageTable(albumName, []);
-            albumContainer.appendChild(table);
-
-            // Добавляем контейнер с новым альбомом в основной контейнер альбомов
-            var mainContainer = document.getElementById('albumsContainer');
-            mainContainer.appendChild(albumContainer);
-
-            // Отправляем запрос на сервер для создания нового альбома
-            fetch('/api/create_album/', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    // 'X-CSRFToken': csrftoken, // Если используете CSRF защиту
-                },
-                body: JSON.stringify({
-                    name: albumName,
-                    user_id: userId,
-                }),
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log('Success:', data);
-                // Здесь можно обновить интерфейс пользователя, например, добавить новый альбом в список
-                // В данном случае, интерфейс уже обновлен, так как мы добавляли альбом в DOM до отправки запроса
-            })
-            .catch((error) => {
-                console.error('Error:', error);
-                // Здесь можно обработать ошибку, например, удалить созданный элемент из DOM
-                mainContainer.removeChild(albumContainer);
-            });
-
-            saveAlbumsToLocalStorage(); // Сохраняем изменения
-        }
-    }
-
-
-        // Функция для добавления работы в альбом
-        function addNewWork(albumContainer, studentName) {
-        var input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.multiple = true; // Позволяем выбрать несколько файлов
-        input.onchange = function(e) {
-            var files = e.target.files;
-            for (var i =  0; i < files.length; i++) {
-                var file = files[i];
-                var reader = new FileReader();
-                reader.onload = function(e) {
-                    var img = { src: e.target.result, alt: studentName }; // Используем ФИО вместо имени файла
-                    // Обновляем таблицу с изображениями
-                    var table = albumContainer.querySelector('table');
-                    if (table) {
-                        var tr = document.createElement('tr');
-                        var td1 = document.createElement('td');
-                        td1.textContent = img.alt; // Используем ФИО
-                        tr.appendChild(td1);
-
-                        var td2 = document.createElement('td');
-                        var imgElement = document.createElement('img');
-                        imgElement.src = img.src;
-                        imgElement.alt = img.alt;
-                        imgElement.style.width = '100px'; // Устанавливаем фиксированный размер для мини-версии
-                        imgElement.onclick = function() { showImage(img.src); }; // Добавляем обработчик клика для увеличения изображения
-                        td2.appendChild(imgElement);
-                        tr.appendChild(td2);
-
-                        var td3 = document.createElement('td');
-                        // Оставляем этот столбец пустым, так как оценка еще не задана
-                        tr.appendChild(td3);
-
-                        table.appendChild(tr);
-                    }
-                    // Сохраняем изменения в localStorage
-                    saveAlbumsToLocalStorage();
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-        input.click();
-    }
-
-
-        // Функция для отображения изображения в модальном окне
-        function showImage(src) {
-            var modal = document.getElementById("myModal");
-            var modalImg = document.getElementById("img01");
-            modalImg.src = src;
-            modal.style.display = "block";
-        }
-
-        // Функция для закрытия модального окна
-        function closeModal() {
-            var modal = document.getElementById("myModal");
-            modal.style.display = "none";
-        }
-
-        // Функция для удаления альбома
-        function deleteAlbum(albumContainer) {
-            var albumsContainer = document.getElementById('albumsContainer');
-            albumsContainer.removeChild(albumContainer); // Удаляем контейнер альбома из DOM
-
-            // Удаляем альбом из localStorage
-            var albums = JSON.parse(localStorage.getItem('albums')) || [];
-            var albumName = albumContainer.querySelector('input[name="title"]').value;
-            var index = albums.findIndex(album => album.name === albumName);
-            if (index !== -1) {
-                albums.splice(index,  1); // Удаляем альбом из массива
-                localStorage.setItem('albums', JSON.stringify(albums)); // Сохраняем обновленный массив в localStorage
-            }
-        }
-
-        // Функция для сохранения альбомов в localStorage
-        function saveAlbumsToLocalStorage() {
-            var albums = [];
-            var albumContainers = document.querySelectorAll('.album-container');
-            albumContainers.forEach(function(container) {
-                var albumName = container.querySelector('input[name="title"]').value;
-                var images = [];
-                var imgElements = container.querySelectorAll('img');
-                imgElements.forEach(function(img) {
-                    images.push({ src: img.src, alt: img.alt });
-                });
-                albums.push({ name: albumName, images: images });
-            });
-            localStorage.setItem('albums', JSON.stringify(albums));
-        }
-
-        // Функция для загрузки альбомов из localStorage
-        function loadAlbumsFromLocalStorage() {
-        var albums = JSON.parse(localStorage.getItem('albums')) || [];
-        albums.forEach(function(album) {
-            var albumContainer = document.createElement('div');
-            albumContainer.className = 'album-container';
-
-            var titleLabel = document.createElement('label');
-            titleLabel.setAttribute('for', 'titleInput');
-            titleLabel.textContent = 'Название альбома:';
-
-            var titleInput = document.createElement('input');
-            titleInput.setAttribute('type', 'text');
-            titleInput.setAttribute('id', 'titleInput');
-            titleInput.setAttribute('name', 'title');
-            titleInput.setAttribute('placeholder', 'Введите название');
-            titleInput.setAttribute('value', album.name);
-            titleInput.setAttribute('readonly', true);
-
-            var dateLabel = document.createElement('label');
-            // Убедитесь, что дата создания корректно загружается из localStorage
-            dateLabel.textContent = 'Дата создания: ' + (album.creationDate || 'Неизвестно');
-
-            var addButton = document.createElement('button');
-            addButton.textContent = 'Добавить работы';
-            addButton.onclick = function() { addNewWork(this.parentNode); };
-
-            var deleteAlbumButton = document.createElement('button');
-            deleteAlbumButton.textContent = 'Удалить альбом';
-            deleteAlbumButton.onclick = function() { deleteAlbum(this.parentNode); };
-
-            albumContainer.appendChild(titleLabel);
-            albumContainer.appendChild(titleInput);
-            albumContainer.appendChild(dateLabel); // Добавляем элемент с датой создания
-            albumContainer.appendChild(addButton);
-            albumContainer.appendChild(deleteAlbumButton);
-
-            var table = createImageTable(album.name, album.images || []);
-            albumContainer.appendChild(table);
-
-            var mainContainer = document.getElementById('albumsContainer');
-            mainContainer.appendChild(albumContainer);
-        });
-    }
-
-    // Вызываем функцию при загрузке страницы
-    window.onload = function() {
-        loadAlbumsFromLocalStorage();
-    };
-
-    function createAlbum(albumName, userId) {
-        fetch('/api/create_album/', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                // 'X-CSRFToken': csrftoken, // Если используете CSRF защиту
-            },
-            body: JSON.stringify({
-                name: albumName,
-                user_id: userId,
-            }),
-        })
-        .then(response => response.json())
-        .then(data => {
-            console.log('Success:', data);
-            // Здесь можно обновить интерфейс пользователя, например, добавить новый альбом в список
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
-    }
-
-
-    </script>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Main</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-    <div class="aside">
-        <input type="text" placeholder="Имя"> <br>
-        <input type="text" placeholder="Фамилия">
-    </div>
-    <div class="main">
-        <label for="subject">Предмет:</label>
-        <select name="subject" id="subject">
-            <option value="math">Математика</option>
-            <option value="physics">Физика</option>
-            <!-- Другие варианты предметов -->
-        </select>
-        <label for="class">Класс:</label>
-        <select name="class" id="class">
-            <option value="5">5 класс</option>
-            <option value="6">6 класс</option>
-            <option value="7">7 класс</option>
-            <option value="8">8 класс</option>
-            <option value="9">9 класс</option>
-            <option value="10">10 класс</option>
-        </select>
-        <br><br>
-        <button onclick="addNewAlbum()">Добавить альбом</button><br>
-        <br><br><br>
-        <div id="albumsContainer">
-        </div>
-        <br><br>
-    </div>
+     <nav class="navbar navbar-light bg-light">
+        <span class="navbar-brand mb-0 h1">Helles</span>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">Log out</a>
+            </li>
+        </ul>
+    </nav>
 
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <span onclick="closeModal()" class="close">&times;</span>
-            <img id="img01" alt="" style="width:100%;">
-        </div>
+<script>
+function showImagePreview(event) {
+    var reader = new FileReader();
+    reader.onload = function(){
+        var output = document.getElementById('imagePreview');
+        output.style.display = 'block';
+        output.src = reader.result;
+    }
+    reader.readAsDataURL(event.target.files[0]);
+}
+</script>
+    <div class="container my-1">
+        <table>
+            <thead>
+                <tr>
+                    <br>
+                    <th>Фамилия</th>
+                    <th>Имя</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td><a href="{% url 'user_profile' user.id %}">{{ user.last_name }}</a></td>
+                    <td><a href="{% url 'user_profile' user.id %}">{{ user.first_name }}</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
     </div>
-
-    <script>
-        window.onload = function() {
-            loadAlbumsFromLocalStorage();
-        };
-    </script>
 </body>
 </html>

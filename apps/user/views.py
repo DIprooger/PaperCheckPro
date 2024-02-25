@@ -1,7 +1,5 @@
 from django.contrib.auth import login, authenticate
-from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
-from rest_framework.decorators import api_view
 
 from apps.user.forms import UserForm, LoginForm, RegisterForm
 
@@ -22,10 +20,16 @@ from rest_framework import status
 from apps.user.serializers import (
     UserRegisterSerializer,
     UserListSerializer,
-    UserInfoSerializer,
+    UserInfoSerializer, StudentWorkSerializer,
 )
-from apps.user.models import User, SubjectGrade, Album
+from apps.user.models import User, StudentWork
 
+import requests
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser
+from rest_framework import status
+from django.core.files.storage import default_storage
 
 class UserRegistrationGenericView(CreateAPIView):
     serializer_class = UserRegisterSerializer
@@ -132,28 +136,10 @@ class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
 
 
 def student(request):
-    return render(request, 'user/student.html')
+    return render(request, 'user/user_profile.html')
 
 def moderator(request):
     return render(request, 'user/moderator.html')
-
-
-def student_page(request):
-    grades = SubjectGrade.objects.all()
-    print(grades)
-    return render(request, 'user/student.html', {'grades': grades})
-
-@api_view(['POST'])
-def create_album(request):
-    if request.method == 'POST':
-        album_name = request.data.get('name')
-        user_id = request.data.get('user_id')
-        user = User.objects.get(id=user_id)
-        new_album = Album(name=album_name, user=user)
-        new_album.save()
-        return Response({"message": "Альбом успешно создан"}, status=201)
-    return Response({"error": "Неверный метод запроса"}, status=400)
-
 
 def user_form_view(request):
     if request.method == 'POST':
@@ -193,3 +179,86 @@ def register(request):
     else:
         form = RegisterForm()
     return render(request, 'user/register.html', {'form': form})
+
+
+
+
+class UploadImagesView(APIView):
+    parser_classes = [MultiPartParser]
+
+    def post(self, request, *args, **kwargs):
+        images = request.FILES.getlist('images[]')
+        responses = []
+
+        for image in images:
+            # Сохраняем изображение в файловом хранилище
+            image_path = default_storage.save(image.name, image)
+            image_url = default_storage.url(image_path)
+
+            # Отправляем изображение на внешний API
+            response = requests.post('https://httpbin.org/post', files={'image': open(image_path, 'rb')})
+
+            # Получаем информацию о работе из ответа
+            # В данном примере мы просто возвращаем статус ответа и URL изображения
+            work_info = {
+                'name': 'Иванов Иван Иванович',  # Предполагается, что это будет имя пользователя
+                'grade': '5',  # Предполагается, что это будет оценка работы
+                'imageUrl': image_url,
+                'apiResponse': response.status_code  # Статус ответа API
+            }
+            responses.append(work_info)
+
+        return Response(responses, status=status.HTTP_200_OK)
+
+
+def moderator_view(request):
+    # Получаем всех пользователей, которые не являются модераторами или админами
+    users = User.objects.filter(is_moderator=False, is_superuser=False)
+    return render(request, 'user/moderator.html', {'users': users})
+
+
+def user_profile(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+
+    if user.is_moderator or user.is_superuser:
+        return redirect(f'/user/{user_id}/?error=access_denied')
+
+    return render(request, 'user/user_profile.html', {'user': user})
+
+
+class CreateWorkView(APIView):
+    serializer_class = StudentWorkSerializer
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+
+        if serializer.is_valid(raise_exception=True):
+            serializer.save()
+
+            return Response(
+                status=status.HTTP_201_CREATED,
+                data=serializer.data
+            )
+        return Response(
+            status=status.HTTP_400_BAD_REQUEST,
+            data=serializer.errors
+        )
+
+class AllStudentWorksView(APIView):
+    serializer_class = StudentWorkSerializer
+
+    def get(self, request, *args, **kwargs):
+        works = StudentWork.objects.all()
+
+        if not works:
+            return Response(
+                status=status.HTTP_404_NOT_FOUND,
+                data=[]
+            )
+
+        serializer = self.serializer_class(works, many=True)
+
+        return Response(
+            status=status.HTTP_200_OK,
+            data=serializer.data
+        )

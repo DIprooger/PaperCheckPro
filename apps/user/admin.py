@@ -1,5 +1,5 @@
 from django.contrib import admin
-from apps.user.models import User, SubjectGrade, Album
+from apps.user.models import User
 
 
 @admin.register(User)
@@ -19,11 +19,3 @@ class UserAdmin(admin.ModelAdmin):
     search_fields = ['email', 'first_name', 'last_name']
 
 
-
-@admin.register(SubjectGrade)
-class SubjectGradeAdmin(admin.ModelAdmin):
-    list_display = ('subject', 'date', 'work_type', 'grade', 'photo')
-    search_fields = ('subject', 'work_type')
-    list_filter = ('date',)
-
-admin.site.register(Album)
