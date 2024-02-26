@@ -178,14 +178,14 @@ def register(request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
-            user = authenticate(request, email=user.email, password=form.cleaned_data.get('password'))
-            if user is not None:
-                login(request, user)
-                return redirect('student_profile') if not user.is_moderator else redirect('moderator')
+            login(request, user)
+            if user.is_moderator:
+                return redirect('moderator')
+            else:
+                return redirect('student_profile')
     else:
         form = RegisterForm()
     return render(request, 'user/register.html', {'form': form})
-
 
 
 
@@ -270,7 +270,7 @@ class AllStudentWorksView(APIView):
         )
 
 @login_required
-def student_profile(request, user_id):
+def student_profile(request):
    return render(request, 'user/student_profile.html', {'profile': user_profile})
 
 
