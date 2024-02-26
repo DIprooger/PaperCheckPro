@@ -42,6 +42,7 @@ document.querySelector('form').addEventListener('submit', function(event) {
         <br>
         <h5>Имя: {{ user.first_name }}</h5>
         <h5>Фамилия: {{ user.last_name }}</h5>
+        <h5>Класс: {{ user.class_num }}</h5>
         <br>
         <form method="post" enctype="multipart/form-data" action="{% url 'create_work' %}">
             {% csrf_token %}

@@ -17,7 +17,7 @@
     </form>
 
     <h4>Уже зарегистрированы? Войти</h4>
-    <form method="post" action="/login/">
+    <form method="post" action="{% url 'login' %}">
         {% csrf_token %}
         <button type="submit">Log in</button>
     </form>
