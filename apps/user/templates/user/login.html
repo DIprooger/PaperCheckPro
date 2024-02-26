@@ -8,10 +8,40 @@
     <title>Document</title>
 </head>
 <body>
-    <form method="post">
+    <form method="post" action="/login/">
         {% csrf_token %}
-        {{ form.as_p }}
+        <label for="username">Email:</label>
+        <input type="email" id="username" name="username" required>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
         <button type="submit">Log in</button>
     </form>
 </body>
 </html>
+
+
+
+<!--<!doctype html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+<!--    <title>Вход</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <h1>Вход</h1>-->
+<!--    {% if user %}-->
+<!--        <form method="post" action="{% url 'student_profile' user.id %}">-->
+<!--            {% csrf_token %}-->
+<!--            <label for="email">Email:</label>-->
+<!--            <input type="email" id="email" name="username" required aria-label="Email"><br><br>-->
+<!--            <label for="password">Password:</label>-->
+<!--            <input type="password" id="password" name="password" required aria-label="Password"><br><br>-->
+<!--            <button type="submit">Log in</button>-->
+<!--        </form>-->
+<!--    {% else %}-->
+<!--        <p>Пользователь не аутентифицирован.</p>-->
+<!--    {% endif %}-->
+<!--</body>-->
+<!--</html>-->

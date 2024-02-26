@@ -1,4 +1,7 @@
+from lib2to3.fixes.fix_input import context
+
 from django.contrib.auth import login, authenticate
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 
 from apps.user.forms import UserForm, LoginForm, RegisterForm
@@ -154,17 +157,20 @@ def user_form_view(request):
 
 
 
+from django.contrib.auth.forms import AuthenticationForm
+
 def login_view(request):
     if request.method == 'POST':
-        form = LoginForm(request, data=request.POST)
+        form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('student') if not user.is_moderator else redirect('moderator')
+            return redirect('student_profile')
+        else:
+            return render(request, 'user/login.html', {'form': form})
     else:
-        form = LoginForm()
+        form = AuthenticationForm()
     return render(request, 'user/login.html', {'form': form})
-
 
 
 def register(request):
@@ -175,7 +181,7 @@ def register(request):
             user = authenticate(request, email=user.email, password=form.cleaned_data.get('password'))
             if user is not None:
                 login(request, user)
-                return redirect('student') if not user.is_moderator else redirect('moderator')
+                return redirect('student_profile') if not user.is_moderator else redirect('moderator')
     else:
         form = RegisterForm()
     return render(request, 'user/register.html', {'form': form})
@@ -262,3 +268,9 @@ class AllStudentWorksView(APIView):
             status=status.HTTP_200_OK,
             data=serializer.data
         )
+
+@login_required
+def student_profile(request, user_id):
+   return render(request, 'user/student_profile.html', {'profile': user_profile})
+
+

@@ -8,6 +8,33 @@
     <title>Document</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
+
+<script>
+// Функция для обработки ответа сервера
+function handleResponse(response) {
+    var resultTextarea = document.getElementById('result');
+    resultTextarea.value = JSON.stringify(response, null,  2); // Преобразование ответа в строку для отображения
+}
+
+// Обработчик события отправки формы
+document.querySelector('form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+    // Здесь должна быть  логика отправки формы на сервер и получения ответа
+    // Например, используя fetch API
+    fetch(this.action, {
+        method: 'POST',
+        body: new FormData(this),
+        headers: {
+            'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => handleResponse(data))
+    .catch(error => console.error('Error:', error));
+});
+</script>
+
 <body>
     <div class="container my-3">
         <br><br>
@@ -20,6 +47,8 @@
             {% csrf_token %}
             <button type="submit">Добавить работу</button>
         </form>
+        <br>
+        <textarea id="result" rows="10" cols="50" readonly></textarea>
         <br>
         <form method="post" action="{% url 'all_student_works' %}">
             {% csrf_token %}
