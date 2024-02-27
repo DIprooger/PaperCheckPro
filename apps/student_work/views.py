@@ -55,12 +55,12 @@ class CreateWorkView(CreateAPIView):
 class DecodeImageView(APIView):
 
     def mathpix(self, image_data):
-        BASE_DIR = '/home/diana/Desktop/Python/training/diplom/.env'
+        BASE_DIR = 'D:\pythonProject\Новая папка (2)\diploma_project_innodom\.env'
         env = environ.Env()
         environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
         mathpix_app_id = env("MATHPIX_APP_ID")
         mathpix_api_key = env("MATHPIX_API")
-        my_path = "/home/diana/Desktop/Python/training/diplom/media/"
+        my_path = "D:\pythonProject\Новая папка (2)\diploma_project_innodom\media"
 
         # Call Mathpix API to decode the image
         response = requests.post(
@@ -129,7 +129,7 @@ class DecodeImageView(APIView):
 class ResponseTextView(APIView):
 
     def open_ai(self, text_data):
-        BASE_DIR = '/home/diana/Desktop/Python/training/diplom/.env'
+        BASE_DIR = 'D:\pythonProject\Новая папка (2)\diploma_project_innodom\.env'
         env = environ.Env()
         environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
         chatgpt_api_key = env("OPEN_AI_API")

@@ -18,3 +18,4 @@ class UserAdmin(admin.ModelAdmin):
     list_filter = ['email', 'is_active', 'date_joined', 'last_login']
     search_fields = ['email', 'first_name', 'last_name']
 
+
