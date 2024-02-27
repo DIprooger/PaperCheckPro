@@ -1,9 +1,9 @@
-from django.contrib import messages
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from apps.user.forms import UserForm, LoginForm, RegisterForm
+from apps.user.forms import RegisterForm
+from django.contrib.auth.forms import AuthenticationForm
 
 from rest_framework.generics import (
     get_object_or_404,
@@ -11,13 +11,13 @@ from rest_framework.generics import (
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-from rest_framework.permissions import (
-    IsAuthenticated,
-    IsAdminUser
-)
+# from rest_framework.permissions import (
+#     IsAuthenticated,
+#     IsAdminUser
+# )
 from rest_framework.request import Request
-from rest_framework.response import Response
-from rest_framework import status
+# from rest_framework.response import Response
+# from rest_framework import status
 
 from apps.user.serializers import (
     UserRegisterSerializer,
@@ -135,29 +135,6 @@ class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
 
 
 
-
-
-def student(request):
-    return render(request, 'user/user_profile.html')
-
-def moderator(request):
-    return render(request, 'user/moderator.html')
-
-def user_form_view(request):
-    if request.method == 'POST':
-        form = UserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            return redirect('student') if not user.is_moderator else redirect('moderator')
-    else:
-        form = UserForm()
-    return render(request, 'user/user_form.html', {'form': form})
-
-
-
-from django.contrib.auth.forms import AuthenticationForm
-
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -223,7 +200,7 @@ class UploadImagesView(APIView):
 
 def moderator_view(request):
     # Получаем всех пользователей, которые не являются модераторами или админами
-    users = User.objects.filter(is_moderator=True)
+    users = User.objects.filter(is_moderator=False, is_superuser=False)
     return render(request, 'user/moderator.html', {'users': users})
 
 

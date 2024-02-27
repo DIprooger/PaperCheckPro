@@ -8,13 +8,13 @@ from rest_framework_simplejwt.views import (
 )
 
 from apps.user.views import (
-    UserRegistrationGenericView,
-    ListUsersGenericView,
-    UserDetailGenericView, UploadImagesView,
+    # UserRegistrationGenericView,
+    # ListUsersGenericView,
+    UserDetailGenericView  #, UploadImagesView,
 )
-from apps.jwt_config.views import (
-    CustomTokenObtainPairView
-)
+# from apps.jwt_config.views import (
+#     CustomTokenObtainPairView
+# )
 
 urlpatterns = [
     # path("", ListUsersGenericView.as_view()),

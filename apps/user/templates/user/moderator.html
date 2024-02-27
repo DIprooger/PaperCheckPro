@@ -5,7 +5,7 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Main</title>
+    <title>Moderator</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
@@ -33,15 +33,14 @@ function showImagePreview(event) {
             <thead>
                 <tr>
                     <br>
-                    <th>&nbsp;&nbsp;&nbsp;Фамилия</th>
-                    <th>&nbsp;Имя</th>
+                    <th>&nbsp;&nbsp;&nbsp;ФИО</th>
+                    <th>&nbsp;Класс</th>
                 </tr>
             </thead>
             <tbody>
                 {% for user in users %}
                 <tr>
-                    <td><a href="{% url 'user_profile' user.id %}">&nbsp;&nbsp;&nbsp;{{ user.last_name }}</a></td>
-                    <td><a href="{% url 'user_profile' user.id %}">{{ user.first_name }}</a></td>
+                    <td><a href="{% url 'user_profile' user.id %}">&nbsp;&nbsp;&nbsp;{{ user.last_name }}  {{ user.first_name }}</a></td>
                     <td><a href="{% url 'user_profile' user.id %}">&nbsp;&nbsp;&nbsp;{{ user.class_num }}</a></td>
                 </tr>
                 {% endfor %}
