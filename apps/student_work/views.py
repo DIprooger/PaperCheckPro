@@ -216,6 +216,14 @@ class DecodeImageView(APIView):
         mathpix_app_id = env("MATHPIX_APP_ID")
         mathpix_api_key = env("MATHPIX_API")
         path_image = "/home/diana/Desktop/Python/training/diplom/media/"
+# =======
+#         BASE_DIR = 'D:\pythonProject\Новая папка (2)\diploma_project_innodom\.env'
+#         env = environ.Env()
+#         environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+#         mathpix_app_id = env("MATHPIX_APP_ID")
+#         mathpix_api_key = env("MATHPIX_API")
+#         my_path = "D:\pythonProject\Новая папка (2)\diploma_project_innodom\media"
+# >>>>>>> main
 
         # Call Mathpix API to decode the image
         response = requests.post(
@@ -302,6 +310,12 @@ class ResponseTextView(APIView):
                     status=status.HTTP_404_NOT_FOUND
                 )
 
+# =======
+#     def open_ai(self, text_data):
+#         BASE_DIR = 'D:\pythonProject\Новая папка (2)\diploma_project_innodom\.env'
+#         env = environ.Env()
+#         environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+# >>>>>>> main
         chatgpt_api_key = env("OPEN_AI_API")
         chatgpt_organization = env('OPEN_AI_ORGANIZATION')
 

@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Student</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-light bg-light">
+        <span class="navbar-brand mb-0 h1">&nbsp;{{ user.first_name }} {{ user.last_name }}</span>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">Log out</a>
+            </li>
+        </ul>
+    </nav>
+
+    <div class="container mt-4">
+        <h2>Your Work</h2>
+        {% if user.work %}
+        <div class="card mb-4">
+            <div class="card-body">
+                <h5 class="card-title">{{ user.work.title }}</h5>
+                <p class="card-text">{{ user.work.description }}</p>
+                {% if user.work.image %}
+                <img src="{{ user.work.image.url }}" alt="Work Image" class="img-fluid">
+                {% endif %}
+            </div>
+        </div>
+        {% else %}
+        <p>No work has been added yet.</p>
+        {% endif %}
+    </div>
+</body>
+</html>

@@ -16,13 +16,6 @@ ___
 * **Database**: PostgreSQL \ MySQL                                                                                      
 * **API**: Django REST framework                                                                                    
 * **Additional tools**: Docker   
-* 
-___
-
-## **Technical requirements**                                                                        
-
-The application must be deployed in a **Docker** container.                                                                        
-Using **Django ORM** to interact with the database.   
 
 ___
 

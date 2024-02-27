@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+
+<script>
+// Функция для обработки ответа сервера
+function handleResponse(response) {
+    var resultTextarea = document.getElementById('result');
+    resultTextarea.value = JSON.stringify(response, null,  2); // Преобразование ответа в строку для отображения
+}
+
+// Обработчик события отправки формы
+document.querySelector('form').addEventListener('submit', function(event) {
+    event.preventDefault(); // Предотвращаем стандартное поведение формы
+
+    // Здесь должна быть  логика отправки формы на сервер и получения ответа
+    // Например, используя fetch API
+    fetch(this.action, {
+        method: 'POST',
+        body: new FormData(this),
+        headers: {
+            'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => handleResponse(data))
+    .catch(error => console.error('Error:', error));
+});
+</script>
+
+<body>
+    <div class="container my-3">
+        <br><br>
+        <h2>Студент</h2>
+        <br>
+        <h5>Имя: {{ user.first_name }}</h5>
+        <h5>Фамилия: {{ user.last_name }}</h5>
+        <h5>Класс: {{ user.class_num }}</h5>
+        <br>
+        <form method="post" enctype="multipart/form-data" action="{% url 'create_work' %}">
+            {% csrf_token %}
+            <button type="submit">Добавить работу</button>
+        </form>
+        <br>
+        <textarea id="result" rows="10" cols="50" readonly></textarea>
+        <br>
+        <form method="post" action="{% url 'all_student_works' %}">
+            {% csrf_token %}
+            <button type="submit">Посмотреть все работы</button>
+        </form>
+        <br>
+        <form method="post" action="{% url 'moderator' %}">
+            {% csrf_token %}
+        <button type="submit" class="btn btn-primary">На главную</button>
+        </form>
+    </div>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<!doctype html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport"-->
+<!--          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+<!--    <title>Document</title>-->
+<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">-->
+<!--</head>-->
+<!--    <script>-->
+<!--        function showImagePreview(event) {-->
+<!--            var reader = new FileReader();-->
+<!--            reader.onload = function(){-->
+<!--                var output = document.getElementById('imagePreview');-->
+<!--                output.style.display = 'block';-->
+<!--                output.src = reader.result;-->
+<!--            }-->
+<!--            reader.readAsDataURL(event.target.files[0]);-->
+<!--        }-->
+<!--    </script>-->
+<!--<body>-->
+<!--    <div class="container my-3">-->
+<!--        <br><br>-->
+<!--        <h2>Cтудент</h2>-->
+<!--        <br>-->
+<!--        <h5>Имя: {{ user.first_name }}</h5>-->
+<!--        <h5>Фамилия: {{ user.last_name }}</h5>-->
+<!--        <img id="imagePreview" src="#" alt="Image Preview" style="display:none; width:130px; height:auto;"> <br>-->
+<!--        <form method="post" enctype="multipart/form-data">-->
+<!--            {% csrf_token %}-->
+<!--            <input type="file" name="photo" accept="image/*" onchange="showImagePreview(event);"> <br><br>-->
+<!--            <button type="submit">Сохранить и посмотреть данные</button>-->
+<!--        </form>-->
+<!--        <br>-->
+<!--        <form method="post" action="{% url 'moderator' %}">-->
+<!--            {% csrf_token %}-->
+<!--            <button type="submit" class="btn btn-primary">На главную</button>-->
+<!--        </form>-->
+<!--    </div>-->
+<!--</body>-->
+<!--</html>-->

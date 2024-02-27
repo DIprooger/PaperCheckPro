@@ -1,5 +1,6 @@
 import re
 from datetime import datetime
+from typing import Optional
 
 from django.test import TestCase
 from apps.user.models import User
@@ -50,7 +51,7 @@ class ListAllUsersGenericViewTest(TestCase):
             self.assertIsInstance(user['first_name'], str)
             self.assertIsInstance(user['last_name'], str)
             self.assertIsInstance(user['username'], str)
-            self.assertIsInstance(user['phone'], (str | None))
+            self.assertIsInstance(user['phone'], (Optional[str]))    # тут изменила из str | None
             self.assertIsInstance(user['is_staff'], bool)
             self.assertIsInstance(user['is_superuser'], bool)
             self.assertIsInstance(user['is_verified'], bool)
