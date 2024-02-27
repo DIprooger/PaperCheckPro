@@ -2,12 +2,23 @@ from django.db import models
 from apps.user.models import User
 
 
+class Example(models.Model):
+    image_work = models.ImageField(upload_to='example')
+    text_work = models.TextField(null=True)
+
+
 class StudentWork(models.Model):
     name_work = models.CharField(max_length=55)
     writing_date = models.DateTimeField()
+    number_of_tasks = models.CharField(max_length=5, default="5")
     student = models.ForeignKey(
         User,
         related_name='student',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    example = models.ForeignKey(
+        Example,
         on_delete=models.SET_NULL,
         null=True
     )

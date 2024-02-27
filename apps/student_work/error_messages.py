@@ -1,0 +1,8 @@
+NO_STUDENT_WORK_ID_PROVIDED = "No student work ID provided."
+NO_IMAGE_DATA_FOUND = "No image data found for the student work."
+FAILED_TO_DECODE_IMAGE = "Failed to decode image using Mathpix API."
+FOTO_NOT_FOUND = "Foto not found."
+STUDENT_WORK_NOT_FOUND = "Student work not found."
+NO_TEXT_DATA_FOUND = "No text data found for the student work."
+NO_RESPONSE_FROM_OPENAI = "No response from OpenAI"
+NO_NEW_TEXT_PROVIDED = "No new text content provided."
