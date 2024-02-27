@@ -1,9 +1,8 @@
-from lib2to3.fixes.fix_input import context
-
+from django.contrib import messages
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
-
+from django.urls import reverse
 from apps.user.forms import UserForm, LoginForm, RegisterForm
 
 from rest_framework.generics import (
@@ -165,9 +164,14 @@ def login_view(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            return redirect('student_profile')
+            # Проверяем статус пользователя и перенаправляем его соответственно
+            if user.is_moderator:
+                return redirect(reverse('moderator'))
+            else:
+                return redirect(reverse('student_profile'))
         else:
-            return render(request, 'user/login.html', {'form': form})
+            # Обработка неудачной попытки входа
+            form = AuthenticationForm()
     else:
         form = AuthenticationForm()
     return render(request, 'user/login.html', {'form': form})
@@ -219,7 +223,7 @@ class UploadImagesView(APIView):
 
 def moderator_view(request):
     # Получаем всех пользователей, которые не являются модераторами или админами
-    users = User.objects.filter(is_moderator=False, is_superuser=False)
+    users = User.objects.filter(is_moderator=True)
     return render(request, 'user/moderator.html', {'users': users})
 
 
