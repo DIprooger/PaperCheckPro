@@ -31,6 +31,7 @@ urlpatterns = [
     path('create_work/', views.CreateWorkView.as_view(), name='create_work'),
     path('all_student_works/', views.AllStudentWorksView.as_view(), name='all_student_works'),
     path('student_profile/', views.student_profile, name='student_profile'),
+    path('album_page/', views.album_page, name='album_page'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
