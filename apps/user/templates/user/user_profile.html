@@ -44,14 +44,14 @@ document.querySelector('form').addEventListener('submit', function(event) {
         <h5>Фамилия: {{ user.last_name }}</h5>
         <h5>Класс: {{ user.class_num }}</h5>
         <br>
-        <form method="post" enctype="multipart/form-data" action="{% url 'create_work' %}">
+        <form method="post" enctype="multipart/form-data" action="{% url 'create-work' %}">
             {% csrf_token %}
             <button type="submit">Добавить работу</button>
         </form>
         <br>
         <textarea id="result" rows="10" cols="50" readonly></textarea>
         <br>
-        <form method="post" action="{% url 'all_student_works' %}">
+        <form method="post" action="{% url 'all-work' %}">
             {% csrf_token %}
             <button type="submit">Посмотреть все работы</button>
         </form>

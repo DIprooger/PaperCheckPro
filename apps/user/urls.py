@@ -28,8 +28,8 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('', views.register, name='register'),
     path('register/', views.register, name='register'),
-    path('create_work/', views.CreateWorkView.as_view(), name='create_work'),
-    path('all_student_works/', views.AllStudentWorksView.as_view(), name='all_student_works'),
+    path('create_work/', views.CreateWorkView.as_view(), name='create_work'), #переходить в работы work/create
+    path('all_student_works/', views.AllStudentWorksView.as_view(), name='all_student_works'), #переходить в работы
     path('student_profile/', views.student_profile, name='student_profile'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

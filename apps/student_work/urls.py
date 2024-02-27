@@ -13,8 +13,8 @@ from apps.student_work.views import (
 
 
 urlpatterns = [
-    path("create/", CreateWorkView.as_view()),
-    path("all-work/", AllStudentWorksView.as_view()),
+    path("create/", CreateWorkView.as_view(), name='create-work'),
+    path("all-work/", AllStudentWorksView.as_view(), name='all-work'),
     path("decode/", DecodeImageView.as_view()),
     path("proven/", ResponseTextView.as_view()),
     path("update-text/<int:work_id>/", UpdateTextWorkView.as_view()),
