@@ -28,8 +28,6 @@ class UserForm(forms.ModelForm):
         return user
 
 
-
-
 class RegisterForm(forms.ModelForm):
     password = forms.CharField(widget=forms.PasswordInput)
     confirm_password = forms.CharField(widget=forms.PasswordInput)

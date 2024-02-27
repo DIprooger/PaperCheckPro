@@ -169,35 +169,6 @@ def register(request):
     return render(request, 'user/register.html', {'form': form})
 
 
-
-class UploadImagesView(APIView):
-    parser_classes = [MultiPartParser]
-
-    def post(self, request, *args, **kwargs):
-        images = request.FILES.getlist('images[]')
-        responses = []
-
-        for image in images:
-            # Сохраняем изображение в файловом хранилище
-            image_path = default_storage.save(image.name, image)
-            image_url = default_storage.url(image_path)
-
-            # Отправляем изображение на внешний API
-            response = requests.post('https://httpbin.org/post', files={'image': open(image_path, 'rb')})
-
-            # Получаем информацию о работе из ответа
-            # В данном примере мы просто возвращаем статус ответа и URL изображения
-            work_info = {
-                'name': 'Иванов Иван Иванович',  # Предполагается, что это будет имя пользователя
-                'grade': '5',  # Предполагается, что это будет оценка работы
-                'imageUrl': image_url,
-                'apiResponse': response.status_code  # Статус ответа API
-            }
-            responses.append(work_info)
-
-        return Response(responses, status=status.HTTP_200_OK)
-
-
 def moderator_view(request):
     # Получаем всех пользователей, которые не являются модераторами или админами
     users = User.objects.filter(is_moderator=False, is_superuser=False)
