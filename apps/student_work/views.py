@@ -301,7 +301,6 @@ class ResponseTextView(APIView):
                     "error": STUDENT_WORK_NOT_FOUND},
                     status=status.HTTP_404_NOT_FOUND
                 )
-
         chatgpt_api_key = env("OPEN_AI_API")
         chatgpt_organization = env('OPEN_AI_ORGANIZATION')
 
