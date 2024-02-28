@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -17,155 +18,21 @@
             </li>
         </ul>
     </nav>
-
-    <form id="classFilterForm">
-        <label for="classSelect">&nbsp;&nbsp;&nbsp;Класс:</label>
-        <select id="classSelect" onchange="filterByClass()">
-            <option value="">---</option>
-            <option value="5А">5А</option>
-            <option value="5Б">5Б</option>
-            <option value="5В">5В</option>
-            <option value="5Г">5Г</option>
-            <option value="5Д">5Д</option>
-            <option value="6А">6А</option>
-            <option value="6Б">6Б</option>
-            <option value="6В">6В</option>
-            <option value="6Г">6Г</option>
-            <option value="6Д">6Д</option>
-            <option value="7А">7А</option>
-            <option value="7Б">7Б</option>
-            <option value="7В">7В</option>
-            <option value="7Г">7Г</option>
-            <option value="7Д">7Д</option>
-            <option value="8А">8А</option>
-            <option value="8Б">8Б</option>
-            <option value="8В">8В</option>
-            <option value="8Г">8Г</option>
-            <option value="8Д">8Д</option>
-            <option value="9А">9А</option>
-            <option value="9Б">9Б</option>
-            <option value="9В">9В</option>
-            <option value="9Г">9Г</option>
-            <option value="9Д">9Д</option>
-            <option value="10А">10А</option>
-            <option value="10Б">10Б</option>
-            <option value="10В">10В</option>
-            <option value="10Г">10Г</option>
-            <option value="10Д">10Д</option>
-            <option value="11А">11А</option>
-            <option value="11Б">11Б</option>
-            <option value="11В">11В</option>
-            <option value="11Г">11Г</option>
-            <option value="11Д">11Д</option>
-        </select>
-    </form>
-    <form method="post" action="{% url 'album_page' %}">
-        {% csrf_token %}
-        <button type="submit">Добавить альбом</button>
+    <form>
         <table>
             <thead>
                 <tr>
                     <th>&nbsp;&nbsp;&nbsp;ФИО</th>
-                    <th>&nbsp;Класс</th>
                 </tr>
             </thead>
             <tbody>
                 {% for user in users %}
                 <tr>
-                    <td><input type="checkbox" class="userCheckbox" name="selectedUsers" value="{{ user.id }}"></td>
                     <td><a href="{% url 'user_profile' user.id %}">&nbsp;&nbsp;&nbsp;{{ user.last_name }}  {{ user.first_name }}</a></td>
-                    <td><a href="{% url 'user_profile' user.id %}">&nbsp;&nbsp;&nbsp;{{ user.class_num }}</a></td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </form>
-
-<script>
-
-function filterByClass() {
-    var selectedClass = document.getElementById('classSelect').value;
-    var rows = document.querySelectorAll('tbody tr');
-
-    rows.forEach(function(row) {
-        var classCell = row.querySelector('td:nth-child(3) a'); // Изменено на  3, так как класс - это третий столбец
-        if (selectedClass === '') {
-            row.style.display = '';
-        } else {
-            if (classCell.textContent.trim() === selectedClass) {
-                row.style.display = '';
-            } else {
-                row.style.display = 'none';
-            }
-        }
-    });
-}
-
-function toggleSelectAll() {
-    var checkboxes = document.querySelectorAll('.userCheckbox');
-    checkboxes.forEach(function(checkbox) {
-        checkbox.checked = document.getElementById('selectAll').checked;
-    });
-}
-
-
-
-document.querySelector('form[method="post"]').addEventListener('submit', function(event) {
-    event.preventDefault(); // Предотвращаем стандартное действие формы
-
-    var selectedUsers = Array.from(document.querySelectorAll('input[name="selectedUsers"]:checked'));
-    var selectedUserIds = selectedUsers.map(function(checkbox) {
-        return checkbox.value; // Получаем ID выбранных пользователей
-    });
-
-    // Перенаправляем пользователя на страницу создания альбома с выбранными пользователями
-    var actionUrl = this.getAttribute('action') + '?users=' + selectedUserIds.join(',');
-    window.location.href = actionUrl;
-});
-
-
-let lastChecked = null;
-
-document.querySelectorAll('.userCheckbox').forEach(checkbox => {
-    checkbox.addEventListener('click', function(e) {
-        if (e.shiftKey && this.checked) {
-            let inBetween = false;
-            if (lastChecked) {
-                let start = Array.from(document.querySelectorAll('.userCheckbox')).indexOf(lastChecked);
-                let end = Array.from(document.querySelectorAll('.userCheckbox')).indexOf(this);
-                if (start > end) {
-                    let temp = start;
-                    start = end;
-                    end = temp;
-                }
-                for (let i = start; i <= end; i++) {
-                    document.querySelectorAll('.userCheckbox')[i].checked = true;
-                }
-            }
-        }
-        lastChecked = this;
-    });
-});
-
-function toggleSelectAll() {
-    var checkboxes = document.querySelectorAll('.userCheckbox');
-    checkboxes.forEach(function(checkbox) {
-        checkbox.checked = document.getElementById('selectAll').checked;
-    });
-}
-
-document.querySelector('form[method="post"]').addEventListener('submit', function(event) {
-    event.preventDefault(); // Предотвращаем стандартное действие формы
-
-    var selectedUsers = Array.from(document.querySelectorAll('input[name="selectedUsers"]:checked'));
-    var selectedUserIds = selectedUsers.map(function(checkbox) {
-        return checkbox.value; // Получаем ID выбранных пользователей
-    });
-
-    // Перенаправляем пользователя на страницу создания альбома с выбранными пользователями
-    var actionUrl = this.getAttribute('action') + '?users=' + selectedUserIds.join(',');
-    window.location.href = actionUrl;
-});
-</script>
 </body>
 </html>

@@ -2,19 +2,45 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Document</title>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedUserIds = urlParams.get('users') ? urlParams.get('users').split(',') : [];
+
+        if (selectedUserIds.length > 0) {
+            fetch(`/get_users/?users=${selectedUserIds.join(',')}`)
+                .then(response => response.json())
+                .then(users => {
+                    const studentsList = document.querySelector('ul');
+                    studentsList.innerHTML = ''; // Очищаем список
+                    users.forEach(user => {
+                        const li = document.createElement('li');
+                        li.textContent = `${user.first_name} ${user.last_name}`;
+                        studentsList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+    });
+    </script>
 </head>
 <body>
     <h2>Выбранные пользователи для создания альбома:</h2>
     <ul>
-        {% for user in users %}
-        <li>{{ user.first_name }} {{ user.last_name }}</li>
-        {% empty %}
-        <li>Нет выбранных пользователей.</li>
-        {% endfor %}
     </ul>
+
+    <form method="post" action="{% url 'album_page' %}">
+        {% csrf_token %}
+        <label for="albumName">Название работы:</label><br>
+        <input type="text" id="albumName" name="albumName"><br><br>
+        <label for="creationDate">Дата создания:</label><br>
+        <input type="text" id="creationDate" name="creationDate" readonly><br><br>
+        <label for="tasksCount">Количество заданий:</label><br>
+        <input type="number" id="tasksCount" name="tasksCount"><br><br>
+        <input type="submit" value="Сохранить">
+    </form>
 </body>
 </html>

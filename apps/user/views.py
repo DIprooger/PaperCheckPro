@@ -1,9 +1,15 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.http import JsonResponse
 from django.shortcuts import render, redirect
 from django.urls import reverse
+from django.views import View
+
 from apps.user.forms import RegisterForm
 from django.contrib.auth.forms import AuthenticationForm
+
+from django.shortcuts import render
+from urllib.parse import unquote
 
 from rest_framework.generics import (
     get_object_or_404,
@@ -24,7 +30,7 @@ from apps.user.serializers import (
     UserListSerializer,
     UserInfoSerializer, StudentWorkSerializer,
 )
-from apps.user.models import User, StudentWork
+from apps.user.models import User, StudentWork, Album
 
 import requests
 from rest_framework.views import APIView
@@ -255,7 +261,13 @@ def student_profile(request):
    return render(request, 'user/student_profile.html', {'profile': user_profile})
 
 
+class GetUsersView(View):
+    def get(self, request, *args, **kwargs):
+        user_ids = request.GET.get('users', '').split(',')
+        users = User.objects.filter(id__in=user_ids)
+        user_list = [{'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name} for user in users]
+        return JsonResponse(user_list, safe=False)
+
 def album_page(request):
-    user_ids = request.GET.get('users', '').split(',')
-    users = User.objects.filter(id__in=user_ids)
-    return render(request, 'user/album_page.html', {'users': users})
+    return render(request, 'user/album_page.html')
+

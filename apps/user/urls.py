@@ -10,7 +10,7 @@ from rest_framework_simplejwt.views import (
 from apps.user.views import (
     # UserRegistrationGenericView,
     # ListUsersGenericView,
-    UserDetailGenericView  #, UploadImagesView,
+    UserDetailGenericView, GetUsersView  # , UploadImagesView,
 )
 # from apps.jwt_config.views import (
 #     CustomTokenObtainPairView
@@ -32,6 +32,7 @@ urlpatterns = [
     path('all_student_works/', views.AllStudentWorksView.as_view(), name='all_student_works'),
     path('student_profile/', views.student_profile, name='student_profile'),
     path('album_page/', views.album_page, name='album_page'),
+    path('get_users/', GetUsersView.as_view(), name='get_users'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
