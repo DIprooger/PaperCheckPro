@@ -43,6 +43,25 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('creationDate').textContent = data.creationDate;
     document.getElementById('tasksCount').textContent = data.tasksCount;
 });
+
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/student-works/') // Замените '/api/student-works/' на реальный URL вашего API
+        .then(response => response.json())
+        .then(data => {
+            const worksContainer = document.getElementById('works-container');
+            data.forEach(work => {
+                const workElement = document.createElement('div');
+                workElement.innerHTML = `
+                    <h3>${work.title}</h3>
+                    <p>${work.description}</p>
+                    <a href="/work-details/${work.id}/">Подробнее</a>
+                `;
+                worksContainer.appendChild(workElement);
+            });
+        })
+        .catch(error => console.error('Error:', error));
+});
+
 </script>
 
 <body>
@@ -67,12 +86,11 @@ document.addEventListener('DOMContentLoaded', function() {
             <button type="submit">Добавить работу</button>
         </form>
         <br>
-<!--        <textarea id="result" rows="10" cols="50" readonly></textarea>-->
-<!--        <br>-->
-        <form method="post" action="{% url 'all_student_works' %}">
-            {% csrf_token %}
-            <button type="submit">Посмотреть все работы</button>
-        </form>
+
+        <div id="works-container">
+            <!-- Здесь будут отображаться работы студентов -->
+        </div>
+
         <br>
         <form method="post" action="{% url 'moderator' %}">
             {% csrf_token %}
