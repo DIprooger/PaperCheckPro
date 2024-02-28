@@ -226,3 +226,7 @@ def student_profile(request):
    return render(request, 'user/student_profile.html', {'profile': user_profile})
 
 
+def album_page(request):
+    user_ids = request.GET.get('users', '').split(',')
+    users = User.objects.filter(id__in=user_ids)
+    return render(request, 'user/album_page.html', {'users': users})
