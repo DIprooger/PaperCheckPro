@@ -89,6 +89,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         <div id="works-container">
             <!-- Здесь будут отображаться работы студентов -->
+            {% for work in student_works %}
+                <div>
+                    <h3>{{ work.name_work }}</h3>
+                    <p>{{ work.writing_date }}</p>
+                    <a href="{% url 'update-text' work.id %}">Редактировать</a>
+                </div>
+            {% endfor %}
         </div>
 
         <br>
