@@ -1,9 +1,14 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import redirect
 from django.urls import reverse
+from django.views import View
+
 from apps.user.forms import RegisterForm
 from django.contrib.auth.forms import AuthenticationForm
+
+from django.shortcuts import render
 
 from rest_framework.generics import (
     get_object_or_404,
@@ -11,27 +16,18 @@ from rest_framework.generics import (
     ListAPIView,
     RetrieveUpdateDestroyAPIView,
 )
-# from rest_framework.permissions import (
-#     IsAuthenticated,
-#     IsAdminUser
-# )
 from rest_framework.request import Request
-# from rest_framework.response import Response
-# from rest_framework import status
 
 from apps.user.serializers import (
     UserRegisterSerializer,
     UserListSerializer,
-    UserInfoSerializer, StudentWorkSerializer,
+    UserInfoSerializer
 )
-from apps.user.models import User, StudentWork
-
-import requests
+from apps.user.models import User
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.parsers import MultiPartParser
 from rest_framework import status
-from django.core.files.storage import default_storage
+
 
 class UserRegistrationGenericView(CreateAPIView):
     serializer_class = UserRegisterSerializer
@@ -184,49 +180,15 @@ def user_profile(request, user_id):
     return render(request, 'user/user_profile.html', {'user': user})
 
 
-class CreateWorkView(APIView):
-    serializer_class = StudentWorkSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-
-            return Response(
-                status=status.HTTP_201_CREATED,
-                data=serializer.data
-            )
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data=serializer.errors
-        )
-
-class AllStudentWorksView(APIView):
-    serializer_class = StudentWorkSerializer
-
-    def get(self, request, *args, **kwargs):
-        works = StudentWork.objects.all()
-
-        if not works:
-            return Response(
-                status=status.HTTP_404_NOT_FOUND,
-                data=[]
-            )
-
-        serializer = self.serializer_class(works, many=True)
-
-        return Response(
-            status=status.HTTP_200_OK,
-            data=serializer.data
-        )
-
 @login_required
 def student_profile(request):
    return render(request, 'user/student_profile.html', {'profile': user_profile})
 
 
-def album_page(request):
-    user_ids = request.GET.get('users', '').split(',')
-    users = User.objects.filter(id__in=user_ids)
-    return render(request, 'user/album_page.html', {'users': users})
+class GetUsersView(View):
+    def get(self, request, *args, **kwargs):
+        user_ids = request.GET.get('users', '').split(',')
+        users = User.objects.filter(id__in=user_ids)
+        user_list = [{'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name} for user in users]
+        return JsonResponse(user_list, safe=False)
+
