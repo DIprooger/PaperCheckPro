@@ -15,8 +15,8 @@
         <br>
         <div class="row">
             <div class="col-md-12">
-                <h5>Имя и фамилия:</h5>
-                <p>{{ user.first_name }} {{ user.last_name }}</p>
+                <h4>Имя и фамилия:</h4>
+                <h5>{{ user.first_name }} {{ user.last_name }}</h5>
             </div>
         </div>
         <br>
@@ -35,6 +35,10 @@
                 </a>
                 <strong>Дата написания:</strong> {{ work.writing_date }}<br>
                 <strong>Оценка:</strong> {{ work.assessment }}
+                <form method="post" action="{% url 'delete_work' work.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Удалить работу</button>
+                </form>
             </li>
             {% endfor %}
         </ul>
