@@ -39,6 +39,11 @@
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Удалить работу</button>
                 </form>
+                <!-- Добавляем кнопку "Проверить работу" -->
+                <form method="post" action="{% url 'check-work' work.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success">Проверить работу</button>
+                </form>
             </li>
             {% endfor %}
         </ul>
@@ -46,10 +51,16 @@
         <p>Нет работ</p>
         {% endif %}
         <br>
-        <form method="get" action="{% url 'moderator' %}">
+        {% if current_user.is_superuser == True %}
+            <form method="get" action="{% url 'admin_page' %}">
+        {% else %}
+            <form method="get" action="{% url 'moderator' %}">
+        {% endif %}
             {% csrf_token %}
             <button type="submit" class="btn btn-primary">На главную</button>
         </form>
     </div>
 </body>
 </html>
+
+

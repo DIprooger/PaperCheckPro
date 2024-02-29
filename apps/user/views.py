@@ -218,7 +218,7 @@ class UserProfileView(View):
         return render(
             request,
             'user/user_profile.html',
-            {'user': user, 'works': work_list}
+            {'user': user, 'works': work_list, 'current_user': request.user}
         )
 
 
@@ -257,7 +257,10 @@ class AdminPageView(View):
 
     def get(self, request, *args, **kwargs):
         users = self.get_queryset()
-        return render(request, self.template_name, {self.context_object_name: users})
+        return render(
+            request,
+            self.template_name,
+            {self.context_object_name: users})
 
 @csrf_exempt
 def delete_user(request, user_id):

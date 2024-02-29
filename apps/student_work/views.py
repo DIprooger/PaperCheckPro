@@ -199,8 +199,8 @@ class UpdateExampleView(APIView):
 
 
 class DecodeImageView(APIView):
-    def get_id(self, request, id):
-        id = request.data.get("id")
+    def get_id(self, request, work_id):
+        id = request.data.get("work_id")
 
         if not id:
             return Response({
@@ -344,7 +344,11 @@ class ResponseTextView(APIView):
         return chat_completion
 
     def post(self, request, *args, **kwargs):
-        student_work_id = request.data.get("id")
+
+        decoder = DecodeImageView()
+        decoder.post(request, *args, **kwargs)
+
+        student_work_id = request.data.get("work_id")
 
         if not student_work_id:
             return Response({
