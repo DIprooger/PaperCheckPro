@@ -16,7 +16,7 @@ urlpatterns = [
     path("create/", CreateWorkView.as_view(), name='create-work'),
     path("all-work/", AllStudentWorksView.as_view(), name='all-work'),
     path("decode/", DecodeImageView.as_view()),
-    path("proven/", ResponseTextView.as_view()),
+    path("proven/<int:work_id>/", ResponseTextView.as_view(), name='check-work'),
     path("update-text/<int:work_id>/", UpdateTextWorkView.as_view()),
     path("update-proven/<int:work_id>/", UpdateProvenTextWorkView.as_view(), name='update-proven'),
 
