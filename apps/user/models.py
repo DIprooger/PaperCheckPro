@@ -32,6 +32,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=75,
         null=True
     )
+
     is_superuser = models.BooleanField(default=False)
     is_moderator = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
@@ -52,4 +53,4 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = 'Users'
 
     def __str__(self):
-        return self.email
+        return  f'{self.first_name} {self.last_name}'

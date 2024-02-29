@@ -59,3 +59,4 @@ class UserInfoSerializer(serializers.ModelSerializer):
             'phone',
             'date_joined'
         ]
+
