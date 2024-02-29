@@ -4,6 +4,7 @@ import environ
 import os
 import json
 import requests
+from django.shortcuts import redirect, render
 from openai import OpenAI
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
@@ -134,7 +135,11 @@ class UpdateProvenTextWorkView(APIView):
     def get(self, request, work_id):
         try:
             work = StudentWork.objects.get(pk=work_id)
-            return Response({'proven_work': work.proven_work})
+            return render(
+                request,
+                'student_work/update_proven.html',
+                {'proven_work': work.proven_work, 'work_id': work_id, 'work': work},
+            )  # Отображение страницы редактирования работы
         except StudentWork.DoesNotExist:
             return Response({
                 'error': STUDENT_WORK_NOT_FOUND},
@@ -216,17 +221,6 @@ class DecodeImageView(APIView):
         mathpix_app_id = env("MATHPIX_APP_ID")
         mathpix_api_key = env("MATHPIX_API")
         path_image = "/home/diana/Desktop/Python/training/diplom/media/"
-<<<<<<< HEAD
-=======
-# =======
-#         BASE_DIR = 'D:\pythonProject\Новая папка (2)\diploma_project_innodom\.env'
-#         env = environ.Env()
-#         environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-#         mathpix_app_id = env("MATHPIX_APP_ID")
-#         mathpix_api_key = env("MATHPIX_API")
-#         my_path = "D:\pythonProject\Новая папка (2)\diploma_project_innodom\media"
-# >>>>>>> main
->>>>>>> 2b26b4a384f7d1dcff1d9d6546fef0924ae4086a
 
         # Call Mathpix API to decode the image
         response = requests.post(
@@ -312,16 +306,7 @@ class ResponseTextView(APIView):
                     "error": STUDENT_WORK_NOT_FOUND},
                     status=status.HTTP_404_NOT_FOUND
                 )
-<<<<<<< HEAD
-=======
 
-# =======
-#     def open_ai(self, text_data):
-#         BASE_DIR = 'D:\pythonProject\Новая папка (2)\diploma_project_innodom\.env'
-#         env = environ.Env()
-#         environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
-# >>>>>>> main
->>>>>>> 2b26b4a384f7d1dcff1d9d6546fef0924ae4086a
         chatgpt_api_key = env("OPEN_AI_API")
         chatgpt_organization = env('OPEN_AI_ORGANIZATION')
 

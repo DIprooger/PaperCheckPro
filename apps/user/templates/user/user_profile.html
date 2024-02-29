@@ -5,116 +5,46 @@
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+    <title>Студент</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
-
-<script>
-// Функция для обработки ответа сервера
-function handleResponse(response) {
-    var resultTextarea = document.getElementById('result');
-    resultTextarea.value = JSON.stringify(response, null,  2); // Преобразование ответа в строку для отображения
-}
-
-// Обработчик события отправки формы
-document.querySelector('form').addEventListener('submit', function(event) {
-    event.preventDefault(); // Предотвращаем стандартное поведение формы
-
-    // Здесь должна быть  логика отправки формы на сервер и получения ответа
-    // Например, используя fetch API
-    fetch(this.action, {
-        method: 'POST',
-        body: new FormData(this),
-        headers: {
-            'X-CSRFToken': document.querySelector('input[name=csrfmiddlewaretoken]').value
-        }
-    })
-    .then(response => response.json())
-    .then(data => handleResponse(data))
-    .catch(error => console.error('Error:', error));
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    // Предполагается, что у вас есть функция для получения данных из сессии
-    var data = getFromSession();
-
-    // Отображаем данные на странице
-    document.getElementById('albumName').textContent = data.albumName;
-    document.getElementById('creationDate').textContent = data.creationDate;
-    document.getElementById('tasksCount').textContent = data.tasksCount;
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    fetch('/api/student-works/') // Замените '/api/student-works/' на реальный URL вашего API
-        .then(response => response.json())
-        .then(data => {
-            const worksContainer = document.getElementById('works-container');
-            data.forEach(work => {
-                const workElement = document.createElement('div');
-                workElement.innerHTML = `
-                    <h3>${work.title}</h3>
-                    <p>${work.description}</p>
-                    <a href="/work-details/${work.id}/">Подробнее</a>
-                `;
-                worksContainer.appendChild(workElement);
-            });
-        })
-        .catch(error => console.error('Error:', error));
-});
-
-</script>
-
 <body>
     <div class="container my-3">
         <br><br>
         <h2>Студент</h2>
         <br>
-        <h5>Имя: {{ user.first_name }}</h5>
-        <h5>Фамилия: {{ user.last_name }}</h5>
-        <br>
-<<<<<<< HEAD
-        <form method="post" enctype="multipart/form-data" action="{% url 'create-work' %}">
-=======
-
-        {% if request.session.album_name %}
-            <p>Название альбома: {{ request.session.album_name }}</p>
-            <p>Дата создания: {{ request.session.creation_date }}</p>
-            <p>Количество заданий: {{ request.session.tasks_count }}</p>
-        {% else %}
-            <p>Нет данных для отображения.</p>
-        {% endif %}
-
-        <form method="post" enctype="multipart/form-data" action="{% url 'create_work' %}">
->>>>>>> d2170d2534236c96c43c4d7053ecae2881a5dfbd
-            {% csrf_token %}
-            <button type="submit">Добавить работу</button>
-        </form>
-        <br>
-<<<<<<< HEAD
-        <textarea id="result" rows="10" cols="50" readonly></textarea>
-        <br>
-        <form method="post" action="{% url 'all-work' %}">
-            {% csrf_token %}
-            <button type="submit">Посмотреть все работы</button>
-        </form>
-=======
-
-        <div id="works-container">
-            <!-- Здесь будут отображаться работы студентов -->
-            {% for work in student_works %}
-                <div>
-                    <h3>{{ work.name_work }}</h3>
-                    <p>{{ work.writing_date }}</p>
-                    <a href="{% url 'update-text' work.id %}">Редактировать</a>
-                </div>
-            {% endfor %}
+        <div class="row">
+            <div class="col-md-12">
+                <h5>Имя и фамилия:</h5>
+                <p>{{ user.first_name }} {{ user.last_name }}</p>
+            </div>
         </div>
-
->>>>>>> d2170d2534236c96c43c4d7053ecae2881a5dfbd
         <br>
-        <form method="post" action="{% url 'moderator' %}">
+        <form method="get" enctype="multipart/form-data" action="{% url 'create-work' %}">
             {% csrf_token %}
-        <button type="submit" class="btn btn-primary">На главную</button>
+            <button type="submit" class="btn btn-primary">Добавить работу</button>
+        </form>
+        <br>
+        {% if works %}
+        <h5>Список работ:</h5>
+        <ul>
+            {% for work in works %}
+            <li>
+                <a href="{% url 'update-proven' work.id %}">
+                    <strong>{{ work.name_work }}</strong><br>
+                </a>
+                <strong>Дата написания:</strong> {{ work.writing_date }}<br>
+                <strong>Оценка:</strong> {{ work.assessment }}
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>Нет работ</p>
+        {% endif %}
+        <br>
+        <form method="get" action="{% url 'moderator' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">На главную</button>
         </form>
     </div>
 </body>

@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect
 from django.urls import reverse
+from django.utils.decorators import method_decorator
 from django.views import View
 
 from apps.user.forms import RegisterForm
@@ -24,10 +25,9 @@ from apps.user.serializers import (
     UserInfoSerializer
 )
 from apps.user.models import User
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-
+from apps.student_work.models import StudentWork
 
 class UserRegistrationGenericView(CreateAPIView):
     serializer_class = UserRegisterSerializer
@@ -130,27 +130,41 @@ class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
         )
 
 
-def login_view(request):
-    if request.method == 'POST':
+class LoginView(View):
+    def get(self, request):
+        form = AuthenticationForm()
+        return render(
+            request,
+            'user/login.html',
+            {'form': form}
+        )
+
+    def post(self, request):
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            # Проверяем статус пользователя и перенаправляем его соответственно
             if user.is_moderator:
                 return redirect(reverse('moderator'))
             else:
                 return redirect(reverse('student_profile'))
-        else:
-            # Обработка неудачной попытки входа
-            form = AuthenticationForm()
-    else:
-        form = AuthenticationForm()
-    return render(request, 'user/login.html', {'form': form})
+        return render(
+            request,
+            'user/login.html',
+            {'form': form}
+        )
 
 
-def register(request):
-    if request.method == 'POST':
+class RegisterView(View):
+    def get(self, request):
+        form = RegisterForm()
+        return render(
+            request,
+            'user/register.html',
+            {'form': form}
+        )
+
+    def post(self, request):
         form = RegisterForm(request.POST)
         if form.is_valid():
             user = form.save()
@@ -159,87 +173,70 @@ def register(request):
                 return redirect('moderator')
             else:
                 return redirect('student_profile')
-    else:
-        form = RegisterForm()
-    return render(request, 'user/register.html', {'form': form})
+        return render(
+            request,
+            'user/register.html',
+            {'form': form}
+        )
 
 
-def moderator_view(request):
-    # Получаем всех пользователей, которые не являются модераторами или админами
-    users = User.objects.filter(is_moderator=False, is_superuser=False)
-    return render(request, 'user/moderator.html', {'users': users})
+class ModeratorView(View):
+    def get(self, request):
+        users = User.objects.filter(is_moderator=False, is_superuser=False)
+        return render(
+            request,
+            'user/moderator.html',
+            {'users': users}
+        )
 
 
-def user_profile(request, user_id):
-    user = get_object_or_404(User, id=user_id)
+class UserProfileView(View):
+    def get(self, request, user_id):
+        user = get_object_or_404(User, id=user_id)
+        if user.is_moderator or user.is_superuser:
+            return redirect(f'/user/{user_id}/?error=access_denied')
 
-    if user.is_moderator or user.is_superuser:
-        return redirect(f'/user/{user_id}/?error=access_denied')
+        works = StudentWork.objects.filter(student=user)
+        work_list = []
 
-    return render(request, 'user/user_profile.html', {'user': user})
+        for work in works:
+            work_data = {
+                'id': work.id,
+                'name_work': work.name_work,
+                'writing_date': work.writing_date,
+                'assessment': work.assessment,
+
+                # Добавьте другие поля работ, если нужно
+            }
+            work_list.append(work_data)
+
+        return render(
+            request,
+            'user/user_profile.html',
+            {'user': user, 'works': work_list}
+        )
 
 
-@login_required
-def student_profile(request):
-   return render(request, 'user/student_profile.html', {'profile': user_profile})
+class StudentProfileView(View):
+    @method_decorator(login_required)
+    def get(self, request):
+        return render(
+            request,
+            'user/student_profile.html',
+            {'profile': request.user}
+        )
 
 
 class GetUsersView(View):
     def get(self, request, *args, **kwargs):
         user_ids = request.GET.get('users', '').split(',')
         users = User.objects.filter(id__in=user_ids)
-        user_list = [{'id': user.id, 'first_name': user.first_name, 'last_name': user.last_name} for user in users]
-        return JsonResponse(user_list, safe=False)
-
-def login_view(request):
-    if request.method == 'POST':
-        form = AuthenticationForm(request, data=request.POST)
-        if form.is_valid():
-            user = form.get_user()
-            login(request, user)
-            # Проверяем статус пользователя и перенаправляем его соответственно
-            if user.is_moderator:
-                return redirect(reverse('moderator'))
-            else:
-                return redirect(reverse('student_profile'))
-        else:
-            # Обработка неудачной попытки входа
-            form = AuthenticationForm()
-    else:
-        form = AuthenticationForm()
-    return render(request, 'user/login.html', {'form': form})
-
-
-def register(request):
-    if request.method == 'POST':
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-            login(request, user)
-            if user.is_moderator:
-                return redirect('moderator')
-            else:
-                return redirect('student_profile')
-    else:
-        form = RegisterForm()
-    return render(request, 'user/register.html', {'form': form})
-
-
-@login_required
-def student_profile(request):
-   return render(request, 'user/student_profile.html', {'profile': user_profile})
-
-
-def moderator_view(request):
-    # Получаем всех пользователей, которые не являются модераторами или админами
-    users = User.objects.filter(is_moderator=False, is_superuser=False)
-    return render(request, 'user/moderator.html', {'users': users})
-
-
-def user_profile(request, user_id):
-    user = get_object_or_404(User, id=user_id)
-
-    if user.is_moderator or user.is_superuser:
-        return redirect(f'/user/{user_id}/?error=access_denied')
-
-    return render(request, 'user/user_profile.html', {'user': user})
+        user_list = [{
+            'id': user.id,
+            'first_name': user.first_name,
+            'last_name': user.last_name}
+            for user in users]
+        return JsonResponse(
+            user_list,
+            safe=False
+        )

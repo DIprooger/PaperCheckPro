@@ -18,7 +18,7 @@ urlpatterns = [
     path("decode/", DecodeImageView.as_view()),
     path("proven/", ResponseTextView.as_view()),
     path("update-text/<int:work_id>/", UpdateTextWorkView.as_view()),
-    path("update-proven/<int:work_id>/", UpdateProvenTextWorkView.as_view()),
+    path("update-proven/<int:work_id>/", UpdateProvenTextWorkView.as_view(), name='update-proven'),
 
     path("example/", CreateExampleView.as_view()),
     path("example-decode/", DecodeImageExapleView.as_view()),
