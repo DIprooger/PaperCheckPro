@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Студент</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -13,6 +12,11 @@
         <br><br>
         <h2>Студент</h2>
         <br>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">Log out</a>
+            </li>
+        </ul>
         <div class="row">
             <div class="col-md-12">
                 <h4>Имя и фамилия:</h4>
@@ -30,19 +34,28 @@
         <ul>
             {% for work in works %}
             <li>
-                <a href="{% url 'update-proven' work.id %}">
+                <a href="{% url 'update-work' work.id %}">
                     <strong>{{ work.name_work }}</strong><br>
                 </a>
                 <strong>Дата написания:</strong> {{ work.writing_date }}<br>
-                <strong>Оценка:</strong> {{ work.assessment }}
+                {% if work.assessment %}
+                    <!-- Если есть оценка, показать её -->
+                    <strong>Оценка:</strong> {{ work.assessment }}<br>
+                    <!-- Показать кнопку "Редактировать" -->
+                    <form method="get" action="{% url 'update-work' work.id %}">
+                        <button type="submit" class="btn btn-primary">Редактировать</button>
+                    </form>
+                {% else %}
+                    <!-- Если нет оценки, показать кнопку "Проверить" -->
+                    <form method="post" action="{% url 'check-work' work.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary">Проверить работу</button>
+                    </form>
+                {% endif %}
+                <!-- Форма для удаления работы -->
                 <form method="post" action="{% url 'delete_work' work.id %}">
                     {% csrf_token %}
                     <button type="submit" class="btn btn-danger">Удалить работу</button>
-                </form>
-                <!-- Добавляем кнопку "Проверить работу" -->
-                <form method="post" action="{% url 'check-work' work.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-success">Проверить работу</button>
                 </form>
             </li>
             {% endfor %}
@@ -62,5 +75,7 @@
     </div>
 </body>
 </html>
+
+
 
 

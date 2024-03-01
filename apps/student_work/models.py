@@ -3,8 +3,12 @@ from apps.user.models import User
 
 
 class Example(models.Model):
+    name_work = models.TextField(max_length=55)
     image_work = models.ImageField(upload_to='example')
     text_work = models.TextField(null=True)
+
+    def __str__(self):
+        return self.name_work
 
 
 class StudentWork(models.Model):

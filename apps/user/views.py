@@ -1,8 +1,8 @@
-from django.contrib.auth import login
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -28,7 +28,14 @@ from apps.user.serializers import (
 from apps.user.models import User
 from rest_framework.response import Response
 from rest_framework import status
-from apps.student_work.models import StudentWork
+from apps.student_work.models import StudentWork, Example
+
+
+class LogoutView(View):
+    def get(self, request):
+        logout(request)
+        return redirect(reverse_lazy('register'))
+
 
 class UserRegistrationGenericView(CreateAPIView):
     serializer_class = UserRegisterSerializer
@@ -49,6 +56,7 @@ class UserRegistrationGenericView(CreateAPIView):
         )
 
 
+@method_decorator(login_required, name='dispatch')
 class ListUsersGenericView(ListAPIView):
     # permission_classes = [IsAuthenticated]
     # permission_classes = [IsAuthenticated, IsAdminUser]
@@ -78,57 +86,58 @@ class ListUsersGenericView(ListAPIView):
         )
 
 
-class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
-    # permission_classes = [IsAuthenticated]
-    serializer_class = UserInfoSerializer
-
-    def get_object(self):
-        user_id = self.kwargs.get("user_id")
-
-        user_obj = get_object_or_404(User, id=user_id)
-
-        return user_obj
-
-    def get(self, request: Request, *args, **kwargs):
-        user = self.get_object()
-
-        serializer = self.serializer_class(user)
-
-        return Response(
-            status=status.HTTP_200_OK,
-            data=serializer.data
-        )
-
-    def put(self, request: Request, *args, **kwargs):
-        user = self.get_object()
-
-        serializer = self.serializer_class(
-            user,
-            data=request.data,
-            partial=True
-        )
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-
-            return Response(
-                status=status.HTTP_200_OK,
-                data=serializer.data
-            )
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data=serializer.errors
-        )
-
-    def delete(self, request: Request, *args, **kwargs):
-        user = self.get_object()
-
-        user.delete()
-
-        return Response(
-            status=status.HTTP_200_OK,
-            data=[]
-        )
+# @method_decorator(login_required, name='dispatch')
+# class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
+#     # permission_classes = [IsAuthenticated]
+#     serializer_class = UserInfoSerializer
+#
+#     def get_object(self):
+#         user_id = self.kwargs.get("user_id")
+#
+#         user_obj = get_object_or_404(User, id=user_id)
+#
+#         return user_obj
+#
+#     def get(self, request: Request, *args, **kwargs):
+#         user = self.get_object()
+#
+#         serializer = self.serializer_class(user)
+#
+#         return Response(
+#             status=status.HTTP_200_OK,
+#             data=serializer.data
+#         )
+#
+#     def put(self, request: Request, *args, **kwargs):
+#         user = self.get_object()
+#
+#         serializer = self.serializer_class(
+#             user,
+#             data=request.data,
+#             partial=True
+#         )
+#
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#
+#             return Response(
+#                 status=status.HTTP_200_OK,
+#                 data=serializer.data
+#             )
+#         return Response(
+#             status=status.HTTP_400_BAD_REQUEST,
+#             data=serializer.errors
+#         )
+#
+#     def delete(self, request: Request, *args, **kwargs):
+#         user = self.get_object()
+#
+#         user.delete()
+#
+#         return Response(
+#             status=status.HTTP_200_OK,
+#             data=[]
+#         )
 
 
 class LoginView(View):
@@ -185,16 +194,19 @@ class RegisterView(View):
         )
 
 
+@method_decorator(login_required, name='dispatch')
 class ModeratorView(View):
     def get(self, request):
         users = User.objects.filter(is_moderator=False, is_superuser=False)
+        examples = Example.objects.all()
         return render(
             request,
             'user/moderator.html',
-            {'users': users}
+            {'users': users, 'examples': examples}
         )
 
 
+@method_decorator(login_required, name='dispatch')
 class UserProfileView(View):
     def get(self, request, user_id):
         user = get_object_or_404(User, id=user_id)
@@ -222,8 +234,9 @@ class UserProfileView(View):
         )
 
 
+@method_decorator(login_required, name='dispatch')
 class StudentProfileView(View):
-    @method_decorator(login_required)
+
     def get(self, request):
         return render(
             request,
@@ -232,6 +245,7 @@ class StudentProfileView(View):
         )
 
 
+@method_decorator(login_required, name='dispatch')
 class GetUsersView(View):
     def get(self, request, *args, **kwargs):
         user_ids = request.GET.get('users', '').split(',')
@@ -247,6 +261,7 @@ class GetUsersView(View):
         )
 
 
+@method_decorator(login_required, name='dispatch')
 class AdminPageView(View):
     model = User
     template_name = 'user/admin_page.html'
@@ -262,22 +277,23 @@ class AdminPageView(View):
             self.template_name,
             {self.context_object_name: users})
 
-@csrf_exempt
-def delete_user(request, user_id):
-    if request.method == 'POST':
+
+@method_decorator([csrf_exempt, login_required], name='dispatch')
+class DeleteUserView(View):
+    def post(self, request, user_id):
         try:
             user = User.objects.get(id=user_id)
             user.delete()
-            return JsonResponse({'status': 'success', 'message': 'Пользователь успешно удалён.'})
+            # После удаления пользователя перенаправляемся на ту же страницу
+            return redirect(reverse('admin_page'))
         except User.DoesNotExist:
             return JsonResponse({'status': 'error', 'message': 'Пользователь не найден.'})
-    else:
+
+    def get(self, request, user_id):
         return JsonResponse({'status': 'error', 'message': 'Неверный метод запроса.'})
 
-def update_proven(request):
-    return render(request, 'student_work/update_proven.html')
 
-
+@method_decorator(login_required, name='dispatch')
 class WorkDeleteView(View):
     def post(self, request, work_id):
         work = get_object_or_404(StudentWork, id=work_id)
