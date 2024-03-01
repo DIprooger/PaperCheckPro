@@ -8,19 +8,21 @@ from rest_framework_simplejwt.views import (
 )
 
 from apps.user.views import (
-    UserDetailGenericView,
+    # UserDetailGenericView,
     LoginView,
     GetUsersView,
     RegisterView,
     ModeratorView,
     StudentProfileView,
     UserProfileView,
-    AdminPageView, WorkDeleteView,
-    # DeleteUserView
+    AdminPageView,
+    WorkDeleteView,
+    DeleteUserView,
+    LogoutView
 )
 
 urlpatterns = [
-    path("<int:user_id>/", UserDetailGenericView.as_view()),
+    # path("<int:user_id>/", UserDetailGenericView.as_view()),
     path("auth/refresh-token/", TokenRefreshView.as_view()),
 
     path('user/<int:user_id>/', UserProfileView.as_view(), name='user_profile'),
@@ -29,9 +31,10 @@ urlpatterns = [
     path('', RegisterView.as_view(), name='register'),
     path('register/', RegisterView.as_view(), name='register'),
     path('student_profile/', StudentProfileView.as_view(), name='student_profile'),
+    path('logout/', LogoutView.as_view(), name='logout'),
     path('get_users/', GetUsersView.as_view(), name='get_users'),
     path('admin_page/', AdminPageView.as_view(), name='admin_page'),
-    path('users/delete/<int:user_id>/', views.delete_user, name='delete_user'),
+    path('delete/<int:user_id>/', DeleteUserView.as_view(), name='delete_user'),
     path('delete_work/<int:work_id>/', WorkDeleteView.as_view(), name='delete_work'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
