@@ -5,6 +5,7 @@ import os
 import json
 import requests
 from django.shortcuts import redirect, render
+from django.views import View
 from openai import OpenAI
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
@@ -60,23 +61,17 @@ class AllStudentWorksView(APIView):
         )
 
 
-class CreateWorkView(CreateAPIView):
-    serializer_class = StudentWorkSerializer
+class CreateWorkView(View):
+    def get(self, request):
+        serializer = StudentWorkSerializer()
+        return render(request, 'student_work/create_work.html', {'form': serializer})
 
-    def post(self, request: Request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-
+    def post(self, request):
+        serializer = StudentWorkSerializer(data=request.POST)
         if serializer.is_valid(raise_exception=True):
             serializer.save()
-
-            return Response(
-                status=status.HTTP_201_CREATED,
-                data=serializer.data
-            )
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data=serializer.errors
-        )
+            return redirect('user_profile') # Замените 'success_url' на URL страницы успеха
+        return render(request, 'student_work/create_work.html', {'form': serializer})
 
 
 class CreateExampleView(CreateAPIView):
