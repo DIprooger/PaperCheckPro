@@ -15,7 +15,7 @@ from apps.user.views import (
     ModeratorView,
     StudentProfileView,
     UserProfileView,
-    AdminPageView, WorkDeleteView,
+    AdminPageView, WorkDeleteView, ToggleStatusView, AddUserView,
     # DeleteUserView
 )
 from ..student_work.views import CreateWorkView
@@ -34,7 +34,8 @@ urlpatterns = [
     path('admin_page/', AdminPageView.as_view(), name='admin_page'),
     path('users/delete/<int:user_id>/', views.delete_user, name='delete_user'),
     path('delete_work/<int:work_id>/', WorkDeleteView.as_view(), name='delete_work'),
-
+    path('api/toggle-status/', ToggleStatusView.as_view(), name='toggle_status'),
+    path('add-user/', AddUserView.as_view(), name='add_user'),
     path('create_work/', CreateWorkView.as_view(), name='create_work'),
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
