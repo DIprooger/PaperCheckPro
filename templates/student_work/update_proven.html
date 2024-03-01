@@ -10,7 +10,7 @@
     <div class="container my-3">
         <h1>Редактирование работы</h1>
         <hr>
-        <form id="edit-work-form" method="post" action="{% url 'user_profile' user.id %}">
+        <form id="edit-work-form" method="post" action="{% url 'update-work' work_id %}">
             {% csrf_token %}
             <div class="form-group">
                 <label for="proven_work">Результаты работы:</label>
@@ -18,10 +18,10 @@
             </div>
             <div class="form-group">
                 <label for="assessment">Оценка:</label>
-                <input type="text" class="form-control" id="assessment" name="assessment" value="{{ assessment }}" disabled>
+                <textarea class="form-control" id="assessment" name="assessment">{{ assessment }}</textarea>
             </div>
             <button type="submit" class="btn btn-primary">Сохранить</button>
-            <a href="{% url 'user_profile' user.id %}" class="btn btn-secondary">Вернуться назад</a>
+            <a href="{% url 'user_profile' user_id %}" class="btn btn-secondary">Вернуться назад</a>
         </form>
     </div>
 </body>
