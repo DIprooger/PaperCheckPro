@@ -1,10 +1,10 @@
 import re
-
 import environ
 import os
 import json
 import requests
 from django.contrib.auth.decorators import login_required
+from django.core.checks import messages
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -16,8 +16,9 @@ from rest_framework.generics import CreateAPIView, get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.utils import timezone
 
-from apps.student_work.forms import ExampleForm
+from apps.student_work.forms import ExampleForm, StudentWorkForm
 from apps.student_work.models import (
     StudentWork,
     Example
@@ -40,6 +41,7 @@ from apps.student_work.success_messages import (
     IMAGE_DECODED_AND_TEXT_SAVED,
     TEXT_COMPLETED_AND_SAVED, DATA_UPDATED,
 )
+from apps.user.models import User
 
 BASE_DIR = "/home/diana/Desktop/Python/training/diplom/.env"
 env = environ.Env()
@@ -67,44 +69,64 @@ class AllStudentWorksView(APIView):
         )
 
 
-@method_decorator(login_required, name='dispatch')
-class CreateWorkView(CreateAPIView):
-    serializer_class = StudentWorkSerializer
+# <<<<<<< HEAD
+# @method_decorator(login_required, name='dispatch')
+# class CreateWorkView(CreateAPIView):
+#     serializer_class = StudentWorkSerializer
+#
+#     def post(self, request: Request, *args, **kwargs):
+#         serializer = self.serializer_class(data=request.data)
+# =======
+# @method_decorator(login_required, name='dispatch')
+# class CreateWorkView(View):
+#     def get(self, request):
+#         serializer = StudentWorkSerializer()
+#         # Получение имени ученика
+#         student_name = request.user.first_name  # Замените на реальное имя, полученное из данных запроса или сессии
+#         context = {'form': serializer, 'student_name': student_name}
+#         return render(request, 'student_work/create_work.html', context)
+#
+#     def post(self, request):
+#         serializer = StudentWorkSerializer(data=request.POST, files=request.FILES)
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#             messages.success(request, 'Работа успешно сохранена.')
+#             return redirect('user_profile')  # Замените 'user_profile' на имя вашего представления
+#         return render(request, 'student_work/create_work.html', {'form': serializer})
 
-    def post(self, request: Request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
+class CreateStudentWorkView(View):
+    def get(self, request, user_id):
+        user = User.objects.get(pk=user_id)
+        initial_data = {'teacher': request.user, 'student': user, 'writing_date': timezone.now()}
+        form = StudentWorkForm(initial=initial_data)
+        return render(request, 'student_work/create_work.html', {'form': form})
 
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-
-            return Response(
-                status=status.HTTP_201_CREATED,
-                data=serializer.data
-            )
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data=serializer.errors
-        )
+    def post(self, request, user_id):
+        form = StudentWorkForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('user_profile', user_id=user_id)  # Redirect to success page after saving
+        return render(request, 'student_work/create_work.html', {'form': form})
 
 
-@method_decorator(login_required, name='dispatch')
-class CreateExampleView(CreateAPIView):
-    serializer_class = ExampleSerializer
-
-    def post(self, request: Request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data)
-
-        if serializer.is_valid(raise_exception=True):
-            serializer.save()
-
-            return Response(
-                status=status.HTTP_201_CREATED,
-                data=serializer.data
-            )
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data=serializer.errors
-        )
+# @method_decorator(login_required, name='dispatch')
+# class CreateExampleView(CreateAPIView):
+#     serializer_class = ExampleSerializer
+#
+#     def post(self, request: Request, *args, **kwargs):
+#         serializer = self.serializer_class(data=request.data)
+#
+#         if serializer.is_valid(raise_exception=True):
+#             serializer.save()
+#
+#             return Response(
+#                 status=status.HTTP_201_CREATED,
+#                 data=serializer.data
+#             )
+#         return Response(
+#             status=status.HTTP_400_BAD_REQUEST,
+#             data=serializer.errors
+#         )
 
 
 @method_decorator(login_required, name='dispatch')
@@ -190,16 +212,13 @@ class UpdateProvenTextWorkView(APIView):
             work = StudentWork.objects.get(pk=work_id)
             proven_work = request.data.get('proven_work')
             assessment = request.data.get('assessment')
-            if (proven_work or assessment) is not None:
+            if proven_work != work.proven_work or assessment != work.assessment:
                 work.proven_work = proven_work
                 work.assessment = assessment
                 work.save()
-                return redirect('user_profile', user_id=work.student_id)
+                return Response({'message': 'Work updated successfully.'}, status=status.HTTP_200_OK)
             else:
-                return Response({
-                    'error': NO_NEW_TEXT_PROVIDED},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
+                return redirect('update-work', work_id=work_id)  # Перенаправление на страницу редактирования
         except StudentWork.DoesNotExist:
             return Response({
                 'error': STUDENT_WORK_NOT_FOUND},
@@ -235,29 +254,10 @@ class UpdateExampleView(APIView):
             raise Http404(STUDENT_WORK_NOT_FOUND)
 
 
-
 @method_decorator(login_required, name='dispatch')
 class ResponseTextView(APIView):
     def get_student_work(self, work_id):
         return get_object_or_404(StudentWork, pk=work_id)
-
-    # def get_id(self, request, id):
-    #     id = request.data.get("id")
-    #
-    #     if not id:
-    #         return Response({
-    #             "error": NO_STUDENT_WORK_ID_PROVIDED},
-    #             status=status.HTTP_400_BAD_REQUEST
-    #         )
-    #
-    #     try:
-    #         student_work = StudentWork.objects.get(pk=id)
-    #     except StudentWork.DoesNotExist:
-    #         return Response({
-    #             "error": STUDENT_WORK_NOT_FOUND},
-    #             status=status.HTTP_404_NOT_FOUND
-    #         )
-    #     return student_work
 
     def mathpix(self, image_data):
         mathpix_app_id = env("MATHPIX_APP_ID")
@@ -414,4 +414,4 @@ class DecodeImageExapleView(APIView):
         example.save()
 
         user_id = request.user.id
-        return redirect(reverse('user_profile', kwargs={'user_id': user_id}))
+        return redirect(reverse('moderator'))
