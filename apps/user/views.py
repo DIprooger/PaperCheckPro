@@ -1,10 +1,11 @@
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 
 from apps.user.forms import RegisterForm
 from django.contrib.auth.forms import AuthenticationForm
@@ -146,6 +147,8 @@ class LoginView(View):
             login(request, user)
             if user.is_moderator:
                 return redirect(reverse('moderator'))
+            elif user.is_superuser:
+                return redirect(reverse('admin_page'))
             else:
                 return redirect(reverse('student_profile'))
         return render(
@@ -171,6 +174,8 @@ class RegisterView(View):
             login(request, user)
             if user.is_moderator:
                 return redirect('moderator')
+            elif user.is_superuser:
+                return redirect('admin_page')
             else:
                 return redirect('student_profile')
         return render(
@@ -213,7 +218,7 @@ class UserProfileView(View):
         return render(
             request,
             'user/user_profile.html',
-            {'user': user, 'works': work_list}
+            {'user': user, 'works': work_list, 'current_user': request.user}
         )
 
 
@@ -240,3 +245,96 @@ class GetUsersView(View):
             user_list,
             safe=False
         )
+
+
+class AdminPageView(View):
+    model = User
+    template_name = 'user/admin_page.html'
+    context_object_name = 'users'
+
+    def get_queryset(self):
+        return User.objects.filter(is_superuser=False)
+
+    def get(self, request, *args, **kwargs):
+        users = self.get_queryset()
+        return render(
+            request,
+            self.template_name,
+            {self.context_object_name: users})
+
+@csrf_exempt
+def delete_user(request, user_id):
+    if request.method == 'POST':
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+            return JsonResponse({'status': 'success', 'message': 'Пользователь успешно удалён.'})
+        except User.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'Пользователь не найден.'})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Неверный метод запроса.'})
+
+def update_proven(request):
+    return render(request, 'student_work/update_proven.html')
+
+
+class WorkDeleteView(View):
+    def post(self, request, work_id):
+        work = get_object_or_404(StudentWork, id=work_id)
+        user_id = work.student_id  # Получите идентификатор пользователя, связанного с работой
+        work.delete()
+        return redirect(reverse('user_profile', kwargs={'user_id': user_id}))
+
+    def get(self, request, work_id):
+        return redirect('user_profile')
+
+class ToggleStatusView(View):
+    def post(self, request, *args, **kwargs):
+        status = request.POST.get('status')
+        user_id = request.POST.get('user_id')
+        value = request.POST.get('value') == 'true'
+
+        try:
+            user = User.objects.get(id=user_id)
+            if status == 'is_superuser':
+                user.is_superuser = value
+            elif status == 'is_moderator':
+                user.is_moderator = value
+            elif status == 'is_staff':
+                user.is_staff = value
+            elif status == 'is_verified':
+                user.is_verified = value
+            elif status == 'is_active':
+                user.is_active = value
+            user.save()
+            return JsonResponse({'status': 'success'})
+        except User.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'User not found'})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
+class AddUserView(View):
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        phone = request.POST.get('phone')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Создание пользователя с новыми полями
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+        # Установка дополнительных полей
+        user.phone = phone
+        user.save()
+
+        return HttpResponseRedirect(reverse('admin_page'))
+

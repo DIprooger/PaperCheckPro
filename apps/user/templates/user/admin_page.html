@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Admin_page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        input[type="submit"] {
+            background-color: #f44336;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+        }
+        input[type="submit"]:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+     <nav class="navbar navbar-light bg-light">
+        <span class="navbar-brand mb-0 h1">&nbsp;{{ user.first_name }} {{ user.last_name }}</span>
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">Log out</a>
+            </li>
+        </ul>
+    </nav>
+ <h2>Список пользователей:</h2>
+
+ <button id="show-add-user-form" class="btn btn-primary">Добавить пользователя</button>
+
+<div id="add-user-form" style="display: none;">
+    <h3>Добавить пользователя</h3>
+    <br>
+    <form action="{% url 'add_user' %}" method="POST">
+        {% csrf_token %}
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required>
+        <br>
+        <label for="first_name">First Name:</label>
+        <input type="text" id="first_name" name="first_name" required>
+        <br>
+        <label for="last_name">Last Name:</label>
+        <input type="text" id="last_name" name="last_name" required>
+        <br>
+        <label for="phone">Phone:</label>
+        <input type="text" id="phone" name="phone" required>
+        <br>
+        <label for="username">Username:</label>
+        <input type="text" id="username" name="username" required>
+        <br>
+        <label for="password">Password:</label>
+        <input type="password" id="password" name="password" required>
+        <br>
+        <input type="submit" value="Добавить">
+    </form>
+</div>
+<br>
+ <table>
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>First Name</th>
+        <th>Last Name</th>
+        <th>Username</th>
+        <th>Phone</th>
+        <th>Superuser</th>
+        <th>Moderator</th>
+        <th>Staff</th>
+        <th>Verified</th>
+        <th>Active</th>
+        <th>Date Joined</th>
+        <th>Last Login</th>
+        <th>Date Delete</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for user in users %}
+      <tr>
+        <td>{{ user.email }}</td>
+        <td><a href="{% url 'user_profile' user.id %}">{{ user.first_name }}</a></td>
+        <td>{{ user.last_name }}</td>
+        <td>{{ user.username }}</td>
+        <td>{{ user.phone }}</td>
+        <td>
+          <input type="checkbox" class="status-toggle" data-status="is_superuser" data-user-id="{{ user.id }}" {% if user.is_superuser %}checked{% endif %}>
+        </td>
+        <td>
+          <input type="checkbox" class="status-toggle" data-status="is_moderator" data-user-id="{{ user.id }}" {% if user.is_moderator %}checked{% endif %}>
+        </td>
+        <td>
+          <input type="checkbox" class="status-toggle" data-status="is_staff" data-user-id="{{ user.id }}" {% if user.is_staff %}checked{% endif %}>
+        </td>
+        <td>
+          <input type="checkbox" class="status-toggle" data-status="is_verified" data-user-id="{{ user.id }}" {% if user.is_verified %}checked{% endif %}>
+        </td>
+        <td>
+          <input type="checkbox" class="status-toggle" data-status="is_active" data-user-id="{{ user.id }}" {% if user.is_active %}checked{% endif %}>
+        </td>
+        <td>{{ user.date_joined }}</td>
+        <td>{{ user.last_login }}</td>
+        <td>{{ user.date_delete }}</td>
+        <td>
+          {% if user.is_superuser %}
+            Superuser
+          {% else %}
+            <form action="{% url 'delete_user' user.id %}" method="POST">
+              {% csrf_token %}
+              <input type="submit" value="Delete">
+            </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+ </table>
+
+<script>
+$(document).ready(function() {
+    $('#show-add-user-form').click(function() {
+        $('#add-user-form').toggle();
+    });
+
+    $('.status-toggle').change(function() {
+        var status = $(this).data('status');
+        var userId = $(this).data('user-id');
+        var isChecked = $(this).is(':checked');
+
+        $.ajax({
+            url: '/api/toggle-status/',
+            type: 'POST',
+            data: {
+                'status': status,
+                'user_id': userId,
+                'value': isChecked,
+                'csrfmiddlewaretoken': $('input[name=csrfmiddlewaretoken]').val()
+            },
+            success: function(response) {
+                alert('Статус обновлен успешно!');
+            },
+            error: function(response) {
+                alert('Ошибка при обновлении статуса.');
+            }
+        });
+    });
+});
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<!doctype html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">-->
+<!--    <meta http-equiv="X-UA-Compatible" content="ie=edge">-->
+<!--    <title>Admin_page</title>-->
+<!--    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">-->
+<!--    <style>-->
+<!--        body {-->
+<!--            font-family: Arial, sans-serif;-->
+<!--            margin: 20px;-->
+<!--        }-->
+<!--        h2 {-->
+<!--            color: #333;-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+<!--        table {-->
+<!--            width: 100%;-->
+<!--            border-collapse: collapse;-->
+<!--            margin-bottom: 20px;-->
+<!--        }-->
+<!--        th, td {-->
+<!--            border: 1px solid #ddd;-->
+<!--            padding: 8px;-->
+<!--            text-align: left;-->
+<!--        }-->
+<!--        th {-->
+<!--            background-color: #f2f2f2;-->
+<!--            color: #333;-->
+<!--        }-->
+<!--        tr:nth-child(even) {-->
+<!--            background-color: #f2f2f2;-->
+<!--        }-->
+<!--        input[type="submit"] {-->
+<!--            background-color: #f44336;-->
+<!--            color: white;-->
+<!--            padding: 5px 10px;-->
+<!--            border: none;-->
+<!--            cursor: pointer;-->
+<!--        }-->
+<!--        input[type="submit"]:hover {-->
+<!--            background-color: #d32f2f;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!-- <h2>Список пользователей:</h2>-->
+<!-- <table>-->
+<!--    <thead>-->
+<!--      <tr>-->
+<!--        <th>Email</th>-->
+<!--        <th>First Name</th>-->
+<!--        <th>Last Name</th>-->
+<!--        <th>Actions</th>-->
+<!--      </tr>-->
+<!--    </thead>-->
+<!--    <tbody>-->
+<!--      {% for user in users %}-->
+<!--      <tr>-->
+<!--        <td>{{ user.email }}</td>-->
+<!--         <td><a href="{% url 'user_profile' user.id %}">{{ user.first_name }}</a></td>-->
+<!--        <td>{{ user.last_name }}</td>-->
+<!--        <td>-->
+<!--          {% if user.is_superuser %}-->
+<!--            Superuser-->
+<!--          {% else %}-->
+<!--            <form action="{% url 'delete_user' user.id %}" method="POST">-->
+<!--              {% csrf_token %}-->
+<!--              <input type="submit" value="Delete">-->
+<!--            </form>-->
+<!--          {% endif %}-->
+<!--        </td>-->
+<!--      </tr>-->
+<!--      {% endfor %}-->
+<!--    </tbody>-->
+<!-- </table>-->
+
+<!--</body>-->
+<!--</html>-->
