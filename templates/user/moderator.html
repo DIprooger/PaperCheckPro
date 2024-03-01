@@ -56,6 +56,9 @@
         </li>
     </ul>
 </nav>
+{% if user.is_superuser == True %}
+<td><a href="{% url 'admin_page' %}">На страницу админа</a></td>
+{% endif %}
 <div class="container">
     <h3>Решения заданий</h3>
     <!-- Форма для добавления нового решения -->

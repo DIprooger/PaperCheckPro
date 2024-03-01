@@ -64,6 +64,11 @@
             <!-- Кнопка отправки формы -->
             <button type="submit">Update</button>
         </form>
+        <form action="{% url 'moderator' %}" method="get">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">Вернуться назад</button>
+        </form>
     </div>
+
 </body>
 </html>

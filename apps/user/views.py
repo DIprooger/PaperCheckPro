@@ -303,3 +303,55 @@ class WorkDeleteView(View):
 
     def get(self, request, work_id):
         return redirect('user_profile')
+
+
+class ToggleStatusView(View):
+    def post(self, request, *args, **kwargs):
+        status = request.POST.get('status')
+        user_id = request.POST.get('user_id')
+        value = request.POST.get('value') == 'true'
+
+        try:
+            user = User.objects.get(id=user_id)
+            if status == 'is_superuser':
+                user.is_superuser = value
+            elif status == 'is_moderator':
+                user.is_moderator = value
+            elif status == 'is_staff':
+                user.is_staff = value
+            elif status == 'is_verified':
+                user.is_verified = value
+            elif status == 'is_active':
+                user.is_active = value
+            user.save()
+            return JsonResponse({'status': 'success'})
+        except User.DoesNotExist:
+            return JsonResponse({'status': 'error', 'message': 'User not found'})
+
+    def get(self, request, *args, **kwargs):
+        return JsonResponse({'status': 'error', 'message': 'Invalid request'})
+
+
+class AddUserView(View):
+    def post(self, request, *args, **kwargs):
+        email = request.POST.get('email')
+        first_name = request.POST.get('first_name')
+        last_name = request.POST.get('last_name')
+        phone = request.POST.get('phone')
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        # Создание пользователя с новыми полями
+        user = User.objects.create_user(
+            username=username,
+            email=email,
+            password=password,
+            first_name=first_name,
+            last_name=last_name
+        )
+        # Установка дополнительных полей
+        user.phone = phone
+        user.save()
+
+        return HttpResponseRedirect(reverse('admin_page'))
+

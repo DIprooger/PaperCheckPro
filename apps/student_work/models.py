@@ -27,9 +27,9 @@ class StudentWork(models.Model):
         null=True
     )
     image_work = models.ImageField(upload_to='image')
-    text_work = models.TextField(null=True)
-    proven_work = models.TextField(null=True)
-    assessment = models.CharField(max_length=10, null=True)
+    text_work = models.TextField(null=True, blank=True)
+    proven_work = models.TextField(null=True, blank=True)
+    assessment = models.CharField(max_length=10, null=True, blank=True)
     teacher = models.ForeignKey(
         User,
         related_name='teacher',
