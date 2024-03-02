@@ -360,7 +360,7 @@ class ResponseTextView(APIView):
         data = json.loads(chatgpt_response)
         completion_text = data["choices"][0]["message"]["content"]
         assessment = re.search(r"Оценка: (\d+)", completion_text)
-        assessment = str(assessment.group(1))[:1]
+        assessment = str(assessment.group(1))[:2]
 
         student_work.proven_work = completion_text
         student_work.assessment = assessment
