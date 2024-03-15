@@ -8,7 +8,6 @@ from rest_framework_simplejwt.views import (
 )
 
 from apps.user.views import (
-    # UserDetailGenericView,
     LoginView,
     GetUsersView,
     RegisterView,
@@ -21,12 +20,9 @@ from apps.user.views import (
     LogoutView,
     ToggleStatusView,
     AddUserView,
-    # DeleteUserView
 )
-# from ..student_work.views import CreateWorkView
 
 urlpatterns = [
-    # path("<int:user_id>/", UserDetailGenericView.as_view()),
     path("auth/refresh-token/", TokenRefreshView.as_view()),
 
     path('user/<int:user_id>/', UserProfileView.as_view(), name='user_profile'),
@@ -41,7 +37,6 @@ urlpatterns = [
     path('delete/<int:user_id>/', DeleteUserView.as_view(), name='delete_user'),
     path('delete_work/<int:work_id>/', WorkDeleteView.as_view(), name='delete_work'),
     path('api/toggle-status/', ToggleStatusView.as_view(), name='toggle_status'),
-    path('add-user/', AddUserView.as_view(), name='add_user'),
-    # path('create_work/', CreateWorkView.as_view(), name='create_work'),
+    path('add-user/', AddUserView.as_view(), name='add_user')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

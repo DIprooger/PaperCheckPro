@@ -35,13 +35,24 @@
 
         .ready {
             color: green;
+            font-weight: bold;
         }
 
         .not-ready {
             color: red;
+            font-weight: bold;
         }
 
         .btn-edit {
+            margin-left: 10px;
+        }
+
+        .no-students {
+            font-style: italic;
+            color: #6c757d;
+        }
+
+        .logout-btn {
             margin-left: 10px;
         }
     </style>
@@ -50,15 +61,18 @@
 
 <nav class="navbar navbar-light bg-light">
     <span class="navbar-brand mb-0 h1">Учитель, {{ user.first_name }} {{ user.last_name }}</span>
-    <ul class="navbar-nav">
+    <ul class="navbar-nav ml-auto">
+        {% if user.is_superuser == True %}
         <li class="nav-item">
+            <a class="nav-link" href="{% url 'admin_page' %}">На страницу админа</a>
+        </li>
+        {% endif %}
+        <li class="nav-item logout-btn">
             <a class="nav-link" href="{% url 'logout' %}">Log out</a>
         </li>
     </ul>
 </nav>
-{% if user.is_superuser == True %}
-<td><a href="{% url 'admin_page' %}">На страницу админа</a></td>
-{% endif %}
+
 <div class="container">
     <h3>Решения заданий</h3>
     <!-- Форма для добавления нового решения -->
@@ -89,27 +103,31 @@
             </li>
         {% endfor %}
     </ul>
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Ученики</th>
-            </tr>
-        </thead>
-        <tbody>
-            <!-- Перечисление учеников -->
-            {% if users %}
-                {% for user in users %}
+    <h3>Работы</h3>
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
                 <tr>
-                    <td><a href="{% url 'user_profile' user.id %}">{{ user.last_name }} {{ user.first_name }}</a></td>
+                    <th>
+                        Вид работы, название и дата
+                    </th>
                 </tr>
-                {% endfor %}
-            {% else %}
-                <tr>
-                    <td>Учеников нет</td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% if users %}
+                    {% for user in users %}
+                    <tr>
+                        <td><a href="{% url 'user_profile' user.id %}">{{ user.last_name }} {{ user.first_name }}</a></td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td class="no-students">Учеников нет</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
 </div>
 
 </body>

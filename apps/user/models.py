@@ -9,6 +9,10 @@ from django.utils.translation import gettext_lazy
 from apps.user.manager import UserManager
 
 
+class SchoolClass(models.Model):
+    name_class = models.CharField(max_length=10)
+
+
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
         max_length=120,
@@ -23,6 +27,12 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=50,
         verbose_name=gettext_lazy('Last name')
     )
+    student_class = models.ForeignKey(
+        SchoolClass,
+        on_delete=models.SET_NULL,
+        blank=True,
+        null=True
+    )
     username = models.CharField(
         max_length=30,
         blank=True,
@@ -35,7 +45,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     is_superuser = models.BooleanField(default=False)
     is_moderator = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
@@ -53,4 +62,4 @@ class User(AbstractBaseUser, PermissionsMixin):
         verbose_name_plural = 'Users'
 
     def __str__(self):
-        return  f'{self.first_name} {self.last_name}'
+        return f'{self.first_name} {self.last_name}'

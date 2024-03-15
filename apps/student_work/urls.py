@@ -1,14 +1,13 @@
 from django.urls import path
 from apps.student_work.views import (
-    # CreateWorkView,
     AllStudentWorksView,
     ResponseTextView,
-    # CreateExampleView,
     UpdateProvenTextWorkView,
-    UpdateTextWorkView,
     UpdateExampleView,
     ExampleCreateView,
-    DecodeImageExapleView, CreateStudentWorkView
+    DecodeImageExapleView,
+    CreateStudentWorkView,
+    TypeStudentWorkCreateView
 )
 
 
@@ -18,8 +17,9 @@ urlpatterns = [
     path("proven/<int:work_id>/", ResponseTextView.as_view(), name='check-work'),
     path("update-proven/<int:work_id>/", UpdateProvenTextWorkView.as_view(), name='update-work'),
 
-    # path("example/", CreateExampleView.as_view()),
     path('example/create/', ExampleCreateView.as_view(), name='create_example'),
     path('decode_image/<int:example_id>/', DecodeImageExapleView.as_view(), name='decode_image'),
     path("update-example/<int:example_id>/", UpdateExampleView.as_view(), name='update-example'),
+
+    path('type_work/create/', TypeStudentWorkCreateView.as_view(), name='create_type_work')
 ]

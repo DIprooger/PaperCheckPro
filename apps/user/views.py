@@ -86,60 +86,6 @@ class ListUsersGenericView(ListAPIView):
         )
 
 
-# @method_decorator(login_required, name='dispatch')
-# class UserDetailGenericView(RetrieveUpdateDestroyAPIView):
-#     # permission_classes = [IsAuthenticated]
-#     serializer_class = UserInfoSerializer
-#
-#     def get_object(self):
-#         user_id = self.kwargs.get("user_id")
-#
-#         user_obj = get_object_or_404(User, id=user_id)
-#
-#         return user_obj
-#
-#     def get(self, request: Request, *args, **kwargs):
-#         user = self.get_object()
-#
-#         serializer = self.serializer_class(user)
-#
-#         return Response(
-#             status=status.HTTP_200_OK,
-#             data=serializer.data
-#         )
-#
-#     def put(self, request: Request, *args, **kwargs):
-#         user = self.get_object()
-#
-#         serializer = self.serializer_class(
-#             user,
-#             data=request.data,
-#             partial=True
-#         )
-#
-#         if serializer.is_valid(raise_exception=True):
-#             serializer.save()
-#
-#             return Response(
-#                 status=status.HTTP_200_OK,
-#                 data=serializer.data
-#             )
-#         return Response(
-#             status=status.HTTP_400_BAD_REQUEST,
-#             data=serializer.errors
-#         )
-#
-#     def delete(self, request: Request, *args, **kwargs):
-#         user = self.get_object()
-#
-#         user.delete()
-#
-#         return Response(
-#             status=status.HTTP_200_OK,
-#             data=[]
-#         )
-
-
 class LoginView(View):
     def get(self, request):
         form = AuthenticationForm()
@@ -354,4 +300,3 @@ class AddUserView(View):
         user.save()
 
         return HttpResponseRedirect(reverse('admin_page'))
-
