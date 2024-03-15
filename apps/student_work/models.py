@@ -1,5 +1,5 @@
 from django.db import models
-from apps.user.models import User
+from apps.user.models import User, SchoolClass
 
 
 class Example(models.Model):
@@ -11,9 +11,39 @@ class Example(models.Model):
         return self.name_work
 
 
+class TypeStudentWork(models.Model):
+    type_work = models.CharField(max_length=55)
+    name_work = models.CharField(max_length=55)
+    writing_date = models.DateTimeField()
+    example = models.ForeignKey(
+        Example,
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    school_class = models.ForeignKey(
+        SchoolClass,
+        related_name='school_class',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+    teacher = models.ForeignKey(
+        User,
+        related_name='teacher_trainer',
+        on_delete=models.SET_NULL,
+        null=True
+    )
+
+
 class StudentWork(models.Model):
     name_work = models.CharField(max_length=55)
     writing_date = models.DateTimeField()
+    student_type = models.ForeignKey(
+        TypeStudentWork,
+        related_name='type_works',
+        on_delete=models.CASCADE,
+        blank=True,
+        null=True
+    )
     number_of_tasks = models.CharField(max_length=5, default="5")
     student = models.ForeignKey(
         User,
@@ -34,6 +64,7 @@ class StudentWork(models.Model):
         User,
         related_name='teacher',
         on_delete=models.SET_NULL,
+        blank=True,
         null=True
     )
     created_at = models.DateTimeField(auto_now_add=True)

@@ -4,7 +4,6 @@ import os
 import json
 import requests
 from django.contrib.auth.decorators import login_required
-from django.core.checks import messages
 from django.http import Http404
 from django.shortcuts import redirect, render
 from django.urls import reverse
@@ -12,38 +11,30 @@ from django.utils.decorators import method_decorator
 from django.views import View
 from openai import OpenAI
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, get_object_or_404
+from rest_framework.generics import get_object_or_404
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils import timezone
 
-from apps.student_work.forms import ExampleForm, StudentWorkForm
+from apps.student_work.forms import ExampleForm, StudentWorkForm, TypeStudentWorkForm
 from apps.student_work.models import (
     StudentWork,
-    Example
+    Example, TypeStudentWork
 )
 from apps.student_work.serializers import (
-    StudentWorkSerializer,
-    ExampleSerializer
+    StudentWorkSerializer
 )
 
 from apps.student_work.error_messages import (
-    NO_STUDENT_WORK_ID_PROVIDED,
     NO_IMAGE_DATA_FOUND,
     FAILED_TO_DECODE_IMAGE,
-    FOTO_NOT_FOUND,
     STUDENT_WORK_NOT_FOUND,
-    NO_TEXT_DATA_FOUND,
     NO_RESPONSE_FROM_OPENAI, NO_NEW_TEXT_PROVIDED
-)
-from apps.student_work.success_messages import (
-    IMAGE_DECODED_AND_TEXT_SAVED,
-    TEXT_COMPLETED_AND_SAVED, DATA_UPDATED,
 )
 from apps.user.models import User
 
-BASE_DIR = "/home/diana/Desktop/Python/training/diplom/.env"
+BASE_DIR = os.path.join(os.getcwd(), '.env')
 env = environ.Env()
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 
@@ -69,64 +60,77 @@ class AllStudentWorksView(APIView):
         )
 
 
-# <<<<<<< HEAD
-# @method_decorator(login_required, name='dispatch')
-# class CreateWorkView(CreateAPIView):
-#     serializer_class = StudentWorkSerializer
-#
-#     def post(self, request: Request, *args, **kwargs):
-#         serializer = self.serializer_class(data=request.data)
-# =======
-# @method_decorator(login_required, name='dispatch')
-# class CreateWorkView(View):
-#     def get(self, request):
-#         serializer = StudentWorkSerializer()
-#         # Получение имени ученика
-#         student_name = request.user.first_name  # Замените на реальное имя, полученное из данных запроса или сессии
-#         context = {'form': serializer, 'student_name': student_name}
-#         return render(request, 'student_work/create_work.html', context)
-#
-#     def post(self, request):
-#         serializer = StudentWorkSerializer(data=request.POST, files=request.FILES)
-#         if serializer.is_valid(raise_exception=True):
-#             serializer.save()
-#             messages.success(request, 'Работа успешно сохранена.')
-#             return redirect('user_profile')  # Замените 'user_profile' на имя вашего представления
-#         return render(request, 'student_work/create_work.html', {'form': serializer})
+class BaseCreate(View):
+    template_name = None
+    form_class = None
+    redirect_url = None
 
+
+@method_decorator(login_required, name='dispatch')
 class CreateStudentWorkView(View):
-    def get(self, request, user_id):
+    def get(self, request, type_work_id, user_id):
         user = User.objects.get(pk=user_id)
-        initial_data = {'teacher': request.user, 'student': user, 'writing_date': timezone.now()}
+        type_work_obj = TypeStudentWork.objects.get(pk=type_work_id)
+        initial_data = {
+            'teacher': request.user,
+            'student': user,
+            'writing_date': timezone.now()
+        }
+        if type_work_obj:
+            initial_data['name_work'] = type_work_obj.name_work
+            initial_data['writing_date'] = type_work_obj.writing_date
+            initial_data['example'] = type_work_obj.example
+            initial_data['sсhol_class'] = type_work_obj.sсhol_class
+            initial_data['student_type'] = type_work_obj.id
+        else:
+            initial_data['student_type'] = None
+
         form = StudentWorkForm(initial=initial_data)
-        return render(request, 'student_work/create_work.html', {'form': form})
+        return render(
+            request,
+            'student_work/create_work.html',
+            {'form': form}
+        )
 
     def post(self, request, user_id):
         form = StudentWorkForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return redirect('user_profile', user_id=user_id)  # Redirect to success page after saving
-        return render(request, 'student_work/create_work.html', {'form': form})
+            return redirect(
+                'user_profile',
+                user_id=user_id
+            )
+        return render(
+            request,
+            'student_work/create_work.html',
+            {'form': form}
+        )
 
 
-# @method_decorator(login_required, name='dispatch')
-# class CreateExampleView(CreateAPIView):
-#     serializer_class = ExampleSerializer
-#
-#     def post(self, request: Request, *args, **kwargs):
-#         serializer = self.serializer_class(data=request.data)
-#
-#         if serializer.is_valid(raise_exception=True):
-#             serializer.save()
-#
-#             return Response(
-#                 status=status.HTTP_201_CREATED,
-#                 data=serializer.data
-#             )
-#         return Response(
-#             status=status.HTTP_400_BAD_REQUEST,
-#             data=serializer.errors
-#         )
+@method_decorator(login_required, name='dispatch')
+class TypeStudentWorkCreateView(View):
+    def get(self, request):
+        initial_data = {
+            'teacher': request.user,
+            'writing_date': timezone.now()
+        }
+        form = TypeStudentWorkForm(initial=initial_data)
+        return render(
+            request,
+            'student_work/create_type_studentwork.html',
+            {'form': form}
+        )
+
+    def post(self, request):
+        form = TypeStudentWorkForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            return redirect('moderator')
+        return render(
+            request,
+            'student_work/create_type_studentwork.html',
+            {'form': form}
+        )
 
 
 @method_decorator(login_required, name='dispatch')
@@ -216,9 +220,14 @@ class UpdateProvenTextWorkView(APIView):
                 work.proven_work = proven_work
                 work.assessment = assessment
                 work.save()
-                return Response({'message': 'Work updated successfully.'}, status=status.HTTP_200_OK)
+                return Response(
+                    {'message': 'Work updated successfully.'},
+                    status=status.HTTP_200_OK
+                )
             else:
-                return redirect('update-work', work_id=work_id)  # Перенаправление на страницу редактирования
+                return redirect(
+                    'update-work', work_id=work_id
+                )  # Перенаправление на страницу редактирования
         except StudentWork.DoesNotExist:
             return Response({
                 'error': STUDENT_WORK_NOT_FOUND},
@@ -234,7 +243,11 @@ class UpdateExampleView(APIView):
             example = Example.objects.get(pk=example_id)
             # Передача текущего значения text_work в контекст шаблона
             old_text_work = example.text_work
-            return render(request, 'student_work/update_example.html', {'example': example, 'old_text_work': old_text_work})
+            return render(
+                request,
+                'student_work/update_example.html',
+                {'example': example, 'old_text_work': old_text_work}
+            )
         except Example.DoesNotExist:
             raise Http404(STUDENT_WORK_NOT_FOUND)
 
@@ -247,9 +260,12 @@ class UpdateExampleView(APIView):
                 example.save()
                 return redirect('moderator')
             else:
-                # Если text_work не передан, возвращаем ту же страницу с автозаполнением предыдущего текста
                 old_text_work = example.text_work
-                return render(request, 'student_work/update_example.html', {'example': example, 'old_text_work': old_text_work})
+                return render(
+                    request,
+                    'student_work/update_example.html',
+                    {'example': example, 'old_text_work': old_text_work}
+                )
         except Example.DoesNotExist:
             raise Http404(STUDENT_WORK_NOT_FOUND)
 
@@ -262,9 +278,9 @@ class ResponseTextView(APIView):
     def mathpix(self, image_data):
         mathpix_app_id = env("MATHPIX_APP_ID")
         mathpix_api_key = env("MATHPIX_API")
-        path_image = "/home/diana/Desktop/Python/training/diplom/media/"
 
-        # Call Mathpix API to decode the image
+        path_image = os.path.join(os.getcwd(), 'media/')
+
         response = requests.post(
             "https://api.mathpix.com/v3/text",
             files={"file": open(path_image + str(image_data), "rb")},
@@ -298,14 +314,20 @@ class ResponseTextView(APIView):
         chatgpt_organization = env('OPEN_AI_ORGANIZATION')
 
         if number_of_tasks == "5":
-            patch_open_ai_text = \
-                "/home/diana/Desktop/Python/training/diplom/apps/student_work/instruction_open_ai/five_shoolwork.txt"
+            patch_open_ai_text = os.path.join(
+                os.getcwd(),
+                'apps/student_work/instruction_open_ai/five_shoolwork.txt'
+            )
         elif number_of_tasks == "10":
-            patch_open_ai_text = \
-                "/home/diana/Desktop/Python/training/diplom/apps/student_work/instruction_open_ai/ten_sholwoork.txt"
+            patch_open_ai_text = os.path.join(
+                os.getcwd(),
+                'apps/student_work/instruction_open_ai/ten_sholwoork.txt'
+            )
         else:
-            patch_open_ai_text = \
-                "/home/diana/Desktop/Python/training/diplom/apps/student_work/instruction_open_ai/other_instruction.txt"
+            patch_open_ai_text = os.path.join(
+                os.getcwd(),
+                'apps/student_work/instruction_open_ai/other_instruction.txt'
+            )
 
         with open(patch_open_ai_text, 'r') as open_ai_text:
             open_ai_text = open_ai_text.read()
@@ -335,12 +357,18 @@ class ResponseTextView(APIView):
         image_data = student_work.image_work
 
         if not image_data:
-            return Response({"error": NO_IMAGE_DATA_FOUND}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": NO_IMAGE_DATA_FOUND},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         response = self.mathpix(image_data)
 
         if response.status_code != 200:
-            return Response({"error": FAILED_TO_DECODE_IMAGE}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": FAILED_TO_DECODE_IMAGE},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
         response_data = response.json()
         decoded_text = response_data.get("text")
@@ -376,7 +404,7 @@ class DecodeImageExapleView(APIView):
     def mathpix(self, image_data):
         mathpix_app_id = env("MATHPIX_APP_ID")
         mathpix_api_key = env("MATHPIX_API")
-        path_image = "/home/diana/Desktop/Python/training/diplom/media/"
+        path_image = os.path.join(os.getcwd(), 'media/')
 
         # Call Mathpix API to decode the image
         response = requests.post(
@@ -400,12 +428,18 @@ class DecodeImageExapleView(APIView):
         image_data = example.image_work
 
         if not image_data:
-            return Response({"error": NO_IMAGE_DATA_FOUND}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(
+                {"error": NO_IMAGE_DATA_FOUND},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         response = self.mathpix(image_data)
 
         if response.status_code != 200:
-            return Response({"error": FAILED_TO_DECODE_IMAGE}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+            return Response(
+                {"error": FAILED_TO_DECODE_IMAGE},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
 
         response_data = response.json()
         decoded_text = response_data.get("text")
