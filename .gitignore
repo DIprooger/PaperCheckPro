@@ -44,13 +44,5 @@ Thumbs.db
 # env #
 #####################
 .env
-pycache/
+*.pyc
 __pycache__/
-__pycache__
- apps/__pycache__/router.cpython-39.pyc
-apps/user/__pycache__/forms.cpython-39.pyc
-apps/user/__pycache__/models.cpython-39.pyc
-apps/user/__pycache__/serializers.cpython-39.pyc
-apps/user/__pycache__/urls.cpython-39.pyc
-apps/user/__pycache__/views.cpython-39.pyc
-
