@@ -12,6 +12,13 @@ from apps.user.manager import UserManager
 class SchoolClass(models.Model):
     name_class = models.CharField(max_length=10)
 
+    class Meta:
+        verbose_name = 'SchoolClass'
+        verbose_name_plural = 'SchoolClasses'
+
+    def __str__(self):
+        return f'{self.name_class}'
+
 
 class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(
@@ -42,10 +49,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         max_length=75,
         null=True
     )
-
     is_superuser = models.BooleanField(default=False)
     is_moderator = models.BooleanField(default=False)
     is_verified = models.BooleanField(default=False)
+    is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
