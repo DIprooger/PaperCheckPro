@@ -33,8 +33,8 @@ class StudentWorkForm(forms.ModelForm):
             'writing_date',
             'student_type',
             'number_of_tasks',
+            'student',
             'image_work',
             'example',
-            'student',
             'teacher'
         ]

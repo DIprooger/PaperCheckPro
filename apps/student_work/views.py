@@ -60,51 +60,34 @@ class AllStudentWorksView(APIView):
         )
 
 
-class BaseCreate(View):
-    template_name = None
-    form_class = None
-    redirect_url = None
-
-
 @method_decorator(login_required, name='dispatch')
 class CreateStudentWorkView(View):
-    def get(self, request, type_work_id, user_id):
-        user = User.objects.get(pk=user_id)
-        type_work_obj = TypeStudentWork.objects.get(pk=type_work_id)
-        initial_data = {
-            'teacher': request.user,
-            'student': user,
-            'writing_date': timezone.now()
-        }
-        if type_work_obj:
-            initial_data['name_work'] = type_work_obj.name_work
-            initial_data['writing_date'] = type_work_obj.writing_date
-            initial_data['example'] = type_work_obj.example
-            initial_data['sсhol_class'] = type_work_obj.sсhol_class
-            initial_data['student_type'] = type_work_obj.id
-        else:
-            initial_data['student_type'] = None
 
-        form = StudentWorkForm(initial=initial_data)
-        return render(
-            request,
-            'student_work/create_work.html',
-            {'form': form}
-        )
+    def post(self, request, type_work_id):
+        try:
+            type_work_obj = TypeStudentWork.objects.get(pk=type_work_id)
+            students = User.objects.filter(student_class=type_work_obj.school_class)
 
-    def post(self, request, user_id):
-        form = StudentWorkForm(request.POST, request.FILES)
-        if form.is_valid():
-            form.save()
-            return redirect(
-                'user_profile',
-                user_id=user_id
-            )
-        return render(
-            request,
-            'student_work/create_work.html',
-            {'form': form}
-        )
+            for student in students:
+                print(request.FILES)
+                initial_data = {
+                    'name_work': type_work_obj.name_work,
+                    'writing_date': type_work_obj.writing_date,
+                    'student_type': type_work_obj.id,
+                    'number_of_tasks': '10',
+                    'student': student.id,
+                    'example': type_work_obj.example.id,
+                    'teacher': request.user.id,
+                }
+                print("Initial data for student", student.username, ":", initial_data)
+                form = StudentWorkForm(initial_data, request.FILES)
+                if form.is_valid():
+                    form.save()
+                else:
+                    print("Errors for student", student.username, ":", form.errors)
+        except Exception as e:
+            print(e)
+        return redirect('moderator')
 
 
 @method_decorator(login_required, name='dispatch')

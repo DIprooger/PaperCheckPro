@@ -12,7 +12,7 @@ from apps.student_work.views import (
 
 
 urlpatterns = [
-    path("create/<int:user_id>/", CreateStudentWorkView.as_view(), name='create_work'),
+    path("create/<int:type_work_id>", CreateStudentWorkView.as_view(), name='create_work'),
     path("all-work/", AllStudentWorksView.as_view(), name='all-work'),
     path("proven/<int:work_id>/", ResponseTextView.as_view(), name='check-work'),
     path("update-proven/<int:work_id>/", UpdateProvenTextWorkView.as_view(), name='update-work'),
