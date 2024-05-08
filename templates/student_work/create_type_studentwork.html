@@ -4,15 +4,78 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Type Student Work</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
 </head>
 <body>
     <h1>Create Type Student Work</h1>
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Submit</button>
+        <label for="id_type_work">Type of Work:</label>
+        {{ form.type_work }}
+        <label for="id_name_work">Name of Work:</label>
+        {{ form.name_work }}
+        <label for="id_writing_date">Writing Date:</label>
+        {{ form.writing_date }}
+        <label for="id_example">Example:</label>
+        {{ form.example }}
+        <label for="id_school_class">School Class:</label>
+        {{ form.school_class }}
+        <label for="id_teacher">Teacher:</label>
+        {{ form.teacher }}<br><br>
+        <button type="submit">Сохранить</button>
+    </form>
+    <form action="{% url 'moderator' %}" method="get">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Вернуться назад</button>
     </form>
 </body>
 </html>
+
 
 

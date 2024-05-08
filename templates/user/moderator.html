@@ -74,36 +74,39 @@
 </nav>
 
 <div class="container">
-    <h3>Решения заданий</h3>
-    <!-- Форма для добавления нового решения -->
-    <form action="{% url 'create_example' %}" method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-primary btn-add-solution">Добавить решение</button>
-    </form>
-    <ul>
-        <!-- Перечисление решений -->
-        {% for example in examples %}
-            <li>
-                {{ example.name_work }}
-                <!-- Если есть текст, отображаем пометку "Готово к использованию" и кнопку "Редактировать" -->
-                {% if example.text_work %}
-                    <span class="ready">Готово к использованию</span>
-                    <form action="{% url 'update-example' example.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-primary btn-edit">Редактировать</button>
-                    </form>
-                <!-- Если нет текста, отображаем пометку "Нет данных" и кнопку "Декодировать" -->
-                {% else %}
-                    <span class="not-ready">Нет данных</span>
-                    <form action="{% url 'decode_image' example.id %}" method="post">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-sm btn-danger btn-edit">Декодировать</button>
-                    </form>
-                {% endif %}
-            </li>
-        {% endfor %}
-    </ul>
+<!--    <h3>Решения заданий</h3>-->
+<!--    &lt;!&ndash; Форма для добавления нового решения &ndash;&gt;-->
+<!--    <form action="{% url 'create_example' %}" method="post">-->
+<!--        {% csrf_token %}-->
+<!--        <button type="submit" class="btn btn-primary btn-add-solution">Добавить решение</button>-->
+<!--    </form>-->
+<!--    <ul>-->
+<!--        &lt;!&ndash; Перечисление решений &ndash;&gt;-->
+<!--        {% for example in examples %}-->
+<!--            <li>-->
+<!--                {{ example.name_work }}-->
+<!--                &lt;!&ndash; Если есть текст, отображаем пометку "Готово к использованию" и кнопку "Редактировать" &ndash;&gt;-->
+<!--                {% if example.text_work %}-->
+<!--                    <span class="ready">Готово к использованию</span>-->
+<!--                    <form action="{% url 'update-example' example.id %}" method="post">-->
+<!--                        {% csrf_token %}-->
+<!--                        <button type="submit" class="btn btn-sm btn-primary btn-edit">Редактировать</button>-->
+<!--                    </form>-->
+<!--                {% else %}-->
+<!--                    <span class="not-ready">Нет данных</span>-->
+<!--                    <form action="{% url 'decode_image' example.id %}" method="post">-->
+<!--                        {% csrf_token %}-->
+<!--                        <button type="submit" class="btn btn-sm btn-danger btn-edit">Декодировать</button>-->
+<!--                    </form>-->
+<!--                {% endif %}-->
+<!--            </li>-->
+<!--        {% endfor %}-->
+<!--    </ul>-->
     <h3>Работы</h3>
+        <form action="{% url 'create_type_work' %}" method="get">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary btn-add-solution">Добавить работу</button>
+    </form>
     <div class="table-responsive">
         <table class="table">
             <thead>
@@ -114,15 +117,15 @@
                 </tr>
             </thead>
             <tbody>
-                {% if users %}
-                    {% for user in users %}
+                {% if type_works %}
+                    {% for type_work in type_works %}
                     <tr>
-                        <td><a href="{% url 'user_profile' user.id %}">{{ user.last_name }} {{ user.first_name }}</a></td>
+                        <td><a href="{% url 'class_user' type_work.id %}">{{ type_work.type_work }} {{ type_work.name_work }} {{ type_work.writing_date }} {{ type_work.school_class }}</a></td>
                     </tr>
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td class="no-students">Учеников нет</td>
+                        <td class="no-students">Работ нет</td>
                     </tr>
                 {% endif %}
             </tbody>

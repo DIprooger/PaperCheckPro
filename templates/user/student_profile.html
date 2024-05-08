@@ -21,7 +21,6 @@
         {% if user.student.all %}
             {% for work in user.student.all %}
         <div class="latex-styled-text">
-
                     <div class="card-body">
                         <h5 class="card-title">{{ work.name_work }}</h5>
                         <p class="card-text">Дата написания: {{ work.writing_date }}</p>

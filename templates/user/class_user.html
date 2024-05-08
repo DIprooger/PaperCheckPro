@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Students</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        h1 {
+            color: #007bff;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        table {
+            width: 80%;
+            margin: 0 auto;
+            border-collapse: collapse;
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+        }
+        th {
+            background-color: #007bff;
+            color: #fff;
+            text-align: left;
+        }
+        tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        tr:hover {
+            background-color: #e9ecef;
+        }
+        input[type="file"] {
+            margin-right: 10px;
+        }
+        .button-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .save-button {
+            background-color: #28a745;
+            color: #fff;
+            border: none;
+            padding: 10px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .save-button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>All Students</h1>
+    <form action="{% url 'create_work' type_work.id %}" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Фамилия</th>
+                    <th>Имя</th>
+                    <th>Добавить работу</th>
+                    <th>Сохранить работу</th> <!-- Добавлен заголовок для кнопки -->
+                </tr>
+            </thead>
+            <tbody>
+                {% if students %}
+                    {% for student in students %}
+                    <tr>
+                        <td>{{ student.last_name }}</td>
+                        <td>{{ student.first_name }}</td>
+                        <td>
+                            <input type="file" name="image_work">
+                        </td>
+                        <td> <!-- Добавлена ячейка для кнопки "Сохранить работу" -->
+                            <button type="submit" class="save-button">Сохранить работу</button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="4">Нет учеников в данном классе</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </form>
+</body>
+</html>
+
+
+
