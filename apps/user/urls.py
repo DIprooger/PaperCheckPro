@@ -20,6 +20,7 @@ from apps.user.views import (
     LogoutView,
     ToggleStatusView,
     AddUserView,
+    AllStudentClassView
 )
 
 urlpatterns = [
@@ -37,6 +38,7 @@ urlpatterns = [
     path('delete/<int:user_id>/', DeleteUserView.as_view(), name='delete_user'),
     path('delete_work/<int:work_id>/', WorkDeleteView.as_view(), name='delete_work'),
     path('api/toggle-status/', ToggleStatusView.as_view(), name='toggle_status'),
-    path('add-user/', AddUserView.as_view(), name='add_user')
+    path('add-user/', AddUserView.as_view(), name='add_user'),
+    path('class_user/<int:type_work_id>', AllStudentClassView.as_view(), name='class_user')
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

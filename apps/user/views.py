@@ -6,6 +6,7 @@ from django.urls import reverse, reverse_lazy
 from django.utils.decorators import method_decorator
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework.views import APIView
 
 from apps.user.forms import RegisterForm
 from django.contrib.auth.forms import AuthenticationForm
@@ -28,7 +29,22 @@ from apps.user.serializers import (
 from apps.user.models import User
 from rest_framework.response import Response
 from rest_framework import status
-from apps.student_work.models import StudentWork, Example
+from apps.student_work.models import StudentWork, Example, TypeStudentWork
+
+
+@method_decorator(login_required, name='dispatch')
+class AllStudentClassView(APIView):
+    serializer_class = UserListSerializer
+
+    def get(self, request: Request, type_work_id, *args, **kwargs):
+        type_work = TypeStudentWork.objects.get(id=type_work_id)
+        students = User.objects.filter(student_class=type_work.school_class)
+
+        return render(
+            request,
+            'user/class_user.html',
+            {'students': students, 'type_work': type_work}
+        )
 
 
 class LogoutView(View):
@@ -58,8 +74,6 @@ class UserRegistrationGenericView(CreateAPIView):
 
 @method_decorator(login_required, name='dispatch')
 class ListUsersGenericView(ListAPIView):
-    # permission_classes = [IsAuthenticated]
-    # permission_classes = [IsAuthenticated, IsAdminUser]
     serializer_class = UserListSerializer
 
     def get_queryset(self):
@@ -143,12 +157,12 @@ class RegisterView(View):
 @method_decorator(login_required, name='dispatch')
 class ModeratorView(View):
     def get(self, request):
-        users = User.objects.filter(is_moderator=False, is_superuser=False)
-        examples = Example.objects.all()
+        type_work = TypeStudentWork.objects.filter(teacher=request.user.id)
+        work = StudentWork.objects.filter(teacher=request.user.id)
         return render(
             request,
             'user/moderator.html',
-            {'users': users, 'examples': examples}
+            {'type_works': type_work, 'works': work}
         )
 
 
@@ -168,8 +182,6 @@ class UserProfileView(View):
                 'name_work': work.name_work,
                 'writing_date': work.writing_date,
                 'assessment': work.assessment,
-
-                # Добавьте другие поля работ, если нужно
             }
             work_list.append(work_data)
 
@@ -214,7 +226,8 @@ class AdminPageView(View):
     context_object_name = 'users'
 
     def get_queryset(self):
-        return User.objects.filter(is_superuser=False)
+        # return User.objects.filter(is_superuser=False)
+        return User.objects.all()
 
     def get(self, request, *args, **kwargs):
         users = self.get_queryset()
@@ -243,7 +256,7 @@ class DeleteUserView(View):
 class WorkDeleteView(View):
     def post(self, request, work_id):
         work = get_object_or_404(StudentWork, id=work_id)
-        user_id = work.student_id  # Получите идентификатор пользователя, связанного с работой
+        user_id = work.student_id
         work.delete()
         return redirect(reverse('user_profile', kwargs={'user_id': user_id}))
 
@@ -287,7 +300,6 @@ class AddUserView(View):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # Создание пользователя с новыми полями
         user = User.objects.create_user(
             username=username,
             email=email,
@@ -295,7 +307,6 @@ class AddUserView(View):
             first_name=first_name,
             last_name=last_name
         )
-        # Установка дополнительных полей
         user.phone = phone
         user.save()
 
