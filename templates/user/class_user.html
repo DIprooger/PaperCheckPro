@@ -75,18 +75,30 @@
             </thead>
             <tbody>
                 {% if students %}
-                    {% for student in students %}
+                {% for student in students %}
                     <tr>
                         <td>{{ student.last_name }}</td>
                         <td>{{ student.first_name }}</td>
                         <td>
                             <input type="file" name="image_work">
                         </td>
-                        <td> <!-- Добавлена ячейка для кнопки "Сохранить работу" -->
-                            <button type="submit" class="save-button">Сохранить работу</button>
-                        </td>
+                        {% for work in student_work %}
+                        {% with flag=True %}
+                            {% if work.student == student and flag %}
+                                <td>
+                                    <button type="submit" class="save-button">Редактировать</button>
+                                </td>
+                                {% with flag=False %}
+                                {% endwith %}
+                            {% endif %}
+                        {% endwith %}
+                        {% empty %}
+                            <td>
+                                <button type="submit" class="save-button">Сохранить работу</button>
+                            </td>
+                        {% endfor %}
                     </tr>
-                    {% endfor %}
+                {% endfor %}
                 {% else %}
                     <tr>
                         <td colspan="4">Нет учеников в данном классе</td>
