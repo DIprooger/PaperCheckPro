@@ -39,11 +39,13 @@ class AllStudentClassView(APIView):
     def get(self, request: Request, type_work_id, *args, **kwargs):
         type_work = TypeStudentWork.objects.get(id=type_work_id)
         students = User.objects.filter(student_class=type_work.school_class)
+        students_work = StudentWork.objects.filter(student_type=type_work)
+        print(students_work)
 
         return render(
             request,
             'user/class_user.html',
-            {'students': students, 'type_work': type_work}
+            {'students': students, 'type_work': type_work, 'student_work': students_work}
         )
 
 
